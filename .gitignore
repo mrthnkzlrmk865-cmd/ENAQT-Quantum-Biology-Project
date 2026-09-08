@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Checkpoint dosyaları (uzun HEOM taramalarının ara kayıtları)
+*_CHECKPOINT.npy
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editör
+.vscode/settings.json

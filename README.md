@@ -1,148 +1,118 @@
-# DNA-İskeleli Kromofor Dizilimlerinde ENAQT — In Silico Modül Seti
+# Environment-Assisted Quantum Transport (ENAQT) in DNA-Scaffolded Chromophore Systems
 
-**Proje:** Titreşimsel Rezonans Mühendisliği ile Çevre-Yardımlı Kuantum Taşınımının (ENAQT)
-Deneysel Doğrulanması — MIT Maker Portfolio / TÜBİTAK 2204-A / Regeneron ISEF
+**In-silico module set for a TÜBİTAK 2204-A high-school research project**
 
-Bu depo, projenin **Faz 2 (In Silico)** bacağında üretilen tüm Python modüllerini,
-ürettikleri veri/grafik çıktılarını ve bunların nasıl çalıştırılacağını belgeler.
-Faz 1 (literatür/matematiksel model) ve Faz 3 (in vitro laboratuvar protokolü)
-ayrı belgelerde ele alınmıştır; bilimsel bulguların anlatısı için `SUMMARY.md`
-dosyasına bakınız.
+This repository contains the complete computational (in-silico) phase of a high-school research project on environment-assisted quantum transport (ENAQT) in DNA-scaffolded donor–acceptor chromophore systems. The work was carried out independently by a high-school student using open-source Python tools (primarily QuTiP).
+
+The goal of the computational phase is to identify a practical parameter window (chromophore distance *r* and environmental dephasing rate *γ*) in which excitonic energy transfer is accelerated by intermediate noise — the classic ENAQT effect — and to quantify how bath memory (non-Markovian effects) changes the robustness of that window. These results are intended to guide a subsequent laboratory validation experiment (time-resolved fluorescence / TCSPC on Cy3–Cy5 labelled DNA constructs).
 
 ---
 
-## 1) Gereksinimler
-
-```bash
-pip install qutip numpy matplotlib pandas seaborn tqdm --break-system-packages
-```
-
-Test edilen sürümler: `qutip==5.3.0`, Python 3.12. HEOM modülleri (`qutip.solver.heom`)
-QuTiP ≥5.0 gerektirir.
-
----
-
-## 2) Dosya Yapısı ve Çalıştırma Sırası
+## Project structure
 
 ```
 ENAQT_Quantum_Biology_Project/
-├── README.md
-├── SUMMARY.md
+├── README.md                 ← this file (how to run the code)
+├── SUMMARY.md                ← scientific narrative and key findings
 ├── requirements.txt
-├── src/                              <- tüm Python modülleri burada
-│   ├── quantum_biology_module.py
-│   ├── enaqt_parameter_scan.py
-│   ├── heom_nonmarkovian_validation.py
-│   └── heom_2d_robustness_scan.py
+├── src/
+│   ├── quantum_biology_module.py      # Step 2.1 – Hamiltonian + basic Lindblad dynamics
+│   ├── enaqt_parameter_scan.py        # Step 2.2 – Sink/Loss model + 2-D Lindblad scan
+│   ├── heom_nonmarkovian_validation.py# Step 2.3 – Lindblad vs HEOM comparison
+│   └── heom_2d_robustness_scan.py     # Step 2.3-ext – full 20×20 HEOM map
 └── results/
-    ├── figures/                      <- tüm PNG çıktıları
-    └── data/                         <- tüm npy/npz/csv çıktıları
+    ├── figures/              # all generated plots (PNG)
+    └── data/                 # numerical grids and CSV
 ```
 
-Modüller **birbirinin üzerine inşa edilecek şekilde** (Adım 2.1 → 2.2 → 2.3)
-tasarlanmıştır; her biri bağımsız olarak da çalıştırılabilir (`if __name__ ==
-"__main__":` bloğu kendi test/demo senaryosunu içerir).
-
-**Not:** Modüller varsayılan olarak çıktılarını `/home/claude/` gibi mutlak
-yollara kaydedecek şekilde yazılmıştı (orijinal geliştirme ortamı). Kendi
-bilgisayarınızda çalıştırırken dosya sonundaki `save_path` / `OUTPUT_DIR`
-değişkenlerini kendi `results/figures/` ve `results/data/` yollarınıza
-güncelleyin (her dosyada bu değişkenler dosyanın başında/ilgili fonksiyon
-imzasında kolayca bulunur).
-
-| # | Dosya | Adım | Ne Yapar | Çalıştırma |
-|---|---|---|---|---|
-| 1 | `src/quantum_biology_module.py` | 2.1 | N-site Frenkel ekziton Hamiltoniyeni + Lindblad dephasing/relaxation; 2-site ve 3-site test senaryoları | `python3 src/quantum_biology_module.py` |
-| 2 | `src/enaqt_parameter_scan.py` | 2.2 | Sink+Loss dinamiği, V(r)=V₀(r₀/r)³ kaplin yasası, γ×r 2D Lindblad taraması, η ve ⟨t⟩ hesaplama | `python3 src/enaqt_parameter_scan.py` |
-| 3 | `src/heom_nonmarkovian_validation.py` | 2.3 | Sabit r=2nm'de Lindblad vs HEOM (Drude-Lorentz banyo) karşılaştırması, Haken-Strobl eşleştirmesi | `python3 src/heom_nonmarkovian_validation.py` |
-| 4 | `src/heom_2d_robustness_scan.py` | 2.3-genişletme | Tam 2D (γ,r) HEOM taraması (20×20=400 nokta), paralelleştirilmiş, checkpoint/resume destekli, yayın-kalitesi heatmap | `python3 src/heom_2d_robustness_scan.py` |
-
-### Çıktı Dosyaları (`results/` altında, önceden üretilmiş halleriyle depoda mevcut)
-
-| Dosya (`results/figures/` veya `results/data/`) | Üreten Modül | İçerik |
-|---|---|---|
-| `figures/dynamics_2site.png`, `figures/dynamics_3site.png` | (1) | Site popülasyon dinamiği + coherence |
-| `figures/single_point_sink_loss_dynamics.png` | (2) | Sink/Loss dahil tam sistem dinamiği (tek nokta) |
-| `figures/enaqt_dual_heatmap.png` | (2) | η(γ,r) ve ⟨t⟩(γ,r) — kanonik (near-resonant) Lindblad modeli |
-| `figures/enaqt_1d_regime_slice.png` | (2) | r=1.96nm kesitinde 3 rejim (Rabi/ENAQT/Zeno) etiketli |
-| `data/eta_scan_data.npz` | (2) | Ham 2D Lindblad tarama verisi (`gamma_range`, `r_range`, `eta_grid`, `mean_time_grid`) |
-| `figures/lindblad_vs_heom_comparison.png` | (3) | Sabit r'de Lindblad/HEOM overlay (sweet spot kayması) |
-| `data/lindblad_vs_heom_data.npz` | (3) | Karşılaştırma ham verisi |
-| `figures/heom_robustness_heatmap.png` | (4) | **Ana teslim edilebilir görsel** — 20×20 HEOM η(γ,r) haritası, anotasyonlu |
-| `figures/heom_mean_trapping_time_heatmap.png` | (4) | 20×20 HEOM ⟨t⟩(γ,r) haritası |
-| `data/heom_2d_scan_results.csv` | (4) | Tidy-format tam tarama verisi (400 satır) |
-| `data/heom_*_grid.npy`, `data/heom_*_range.npy` | (4) | Hızlı Python geri-yükleme için ham grid'ler |
+All modules can be run independently. They were written to build on one another (2.1 → 2.2 → 2.3).
 
 ---
 
-## 3) Birim Sistemi (KRİTİK)
-
-Tüm modüllerde tutarlı bir birim sözleşmesi kullanılır:
-
-- **Enerjiler / kaplinler**: girdi olarak cm⁻¹ (spektroskopik standart), dahili
-  olarak `CM1_TO_RADPS = 2π × 2.99792458×10⁻² ≈ 0.188365` sabitiyle rad/ps'ye
-  çevrilir (ħ=1 sözleşmesi, QuTiP'in beklediği format).
-- **Zaman**: ps (picosaniye).
-- **Dephasing/relaxation/sink/loss hızları**: doğrudan ps⁻¹ (rad/ps ile aynı
-  boyutta, ek dönüşüm gerekmez).
-- **Sıcaklık**: Kelvin girilir, `KB_CM1_PER_K = 0.695034800` ile enerji
-  birimine (cm⁻¹) çevrilip ardından rad/ps'ye taşınır.
-
----
-
-## 4) Model Mimarisi Özeti
-
-```
-Faz 2.1: H_S (N-site) + Lindblad(dephasing, relaxation+detailed balance)
-              │
-              ▼
-Faz 2.2: + Sink operatörü (akseptör→RC) + Loss operatörü (her site→floresan kaybı)
-         + V(r) = V₀(r₀/r)³ mesafe-kaplin yasası
-         + η ve ⟨t⟩ = ∫t·Γ_sink·P_acc(t)dt / ∫Γ_sink·P_acc(t)dt tanımları
-              │
-              ▼
-Faz 2.3: Dephasing kanalı Lindblad'dan HEOM'a taşınır (Drude-Lorentz banyo,
-         J(ω)=2λγ_c ω/(ω²+γ_c²)); Sink/Loss/Relaxation Liouvillian üzerinden
-         HEOM'a Markovian kanal olarak enjekte edilir
-         (qutip.liouvillian(H, c_ops) → HEOMSolver(L, baths, max_depth))
-```
-
----
-
-## 5) Bilinen Sınırlamalar / Dikkat Edilmesi Gerekenler
-
-1. **İki farklı parametre seti kullanılır** (bilinçli tasarım kararı):
-   - *Gerçekçi Cy3/Cy5* (E₁=18800, E₂=15800 cm⁻¹): deneysel bağlantı için, ama
-     büyük enerji farkı nedeniyle ENAQT'nin Zeno kolu γ∈[0.01,100] ps⁻¹
-     aralığında görünmez (bkz. `enaqt_parameter_scan.py` içindeki tasarım notu).
-   - *Kanonik near-resonant toy dimer* (E₁=25, E₂=0 cm⁻¹): ENAQT fiziğini
-     (Rabi→optimum→Zeno) net izole etmek için, literatürdeki standart
-     yaklaşımı (Rebentrost ve ark. 2009) izler.
-2. **Trapezoidal integrasyon çözünürlüğü**: kısa mesafede (güçlü kaplin,
-   hızlı salınım) düşük `n_steps` aliasing hatasına yol açar — doğrulama
-   için `eta_direct` vs `eta_integral` farkı her taramada raporlanır
-   (hedef: <1e-3).
-3. **Haken-Strobl eşleştirmesi** (`λ(γ)=γ·γ_c/(2kT)`) yalnızca γ_c→∞
-   (hızlı banyo) limitinde Lindblad ile HEOM'u tam örtüştürür; sonlu γ_c'de
-   aradaki fark banyo hafızasının fiziksel imzasıdır (bug değil, ölçüm hedefi).
-4. **HEOM hesaplama maliyeti**: `max_depth=5, Nk=1` hız/doğruluk dengesi
-   için seçilmiştir (yakınsama testi: `max_depth=6,Nk=2`'ye göre <%0.2 fark).
-   Tam 400 nokta tarama tek çekirdekte ~25-30 dk sürer; `heom_2d_robustness_scan.py`
-   checkpoint/resume mekanizmasıyla kesintilere karşı korumalıdır.
-
----
-
-## 6) Hızlı Doğrulama
-
-Herhangi bir modülün doğru kurulduğunu test etmek için:
+## Requirements
 
 ```bash
-python3 src/quantum_biology_module.py   # ~5 saniyede tamamlanmalı, 2 PNG üretmeli
+pip install qutip==5.3.0 numpy matplotlib pandas seaborn tqdm
 ```
 
-Çıktıda `[OK] Adım 2.1 testleri başarıyla tamamlandı.` görülmeli ve toplam
-popülasyonun 1.0'da korunduğu doğrulanmalıdır (sink olmadığı için).
+Python ≥ 3.10 and QuTiP ≥ 5.0 are required (HEOM solver lives in `qutip.solver.heom`).
 
-**Not:** `quantum_biology_module.py` dosyasındaki `save_path` argümanlarını
-(`/home/claude/dynamics_2site.png` gibi) kendi `results/figures/` yolunuza
-güncellemeniz gerekebilir (bkz. Bölüm 2'deki not).
+**Note on paths:** Some scripts originally wrote to absolute paths used during development. Before re-running, set the output directories inside each script to your local `results/figures/` and `results/data/` folders.
+
+---
+
+## How to run (recommended order)
+
+| Step | Script | What it does | Approx. runtime |
+|------|--------|--------------|-----------------|
+| 2.1  | `python src/quantum_biology_module.py` | Builds N-site Frenkel exciton Hamiltonian + Lindblad dephasing/relaxation; produces 2-site and 3-site population & coherence dynamics | ~5–10 s |
+| 2.2  | `python src/enaqt_parameter_scan.py` | Adds Sink (reaction-centre) and Loss channels, distance-dependent coupling \(V(r)\propto 1/r^3\), computes transfer efficiency \(\eta\) and mean trapping time \(\langle t\rangle\) on a 2-D grid | a few minutes |
+| 2.3  | `python src/heom_nonmarkovian_validation.py` | Fixed-distance comparison of Markovian Lindblad vs non-Markovian HEOM (Drude–Lorentz bath) | ~1–2 min |
+| 2.3-ext | `python src/heom_2d_robustness_scan.py` | Full 20×20 HEOM scan over \(\gamma\) and \(r\) (400 independent simulations, parallelised, checkpointed) | ~25–40 min (single core) / much faster with multiple cores |
+
+---
+
+## Generated figures (all included in `results/figures/`)
+
+| File | Description |
+|------|-------------|
+| `dynamics_2site.png` | Population and coherence dynamics of a two-site (Cy3–Cy5-like) system |
+| `dynamics_3site.png` | Three-site (FMO-inspired) population dynamics |
+| `single_point_sink_loss_dynamics.png` | Full dynamics including Sink and Loss at a single parameter point |
+| `enaqt_dual_heatmap.png` | Lindblad 2-D maps of \(\eta(\gamma,r)\) and \(\langle t\rangle(\gamma,r)\) (near-resonant model) |
+| `enaqt_1d_regime_slice.png` | 1-D cut at fixed *r* showing the three regimes (Rabi → ENAQT → Quantum Zeno) |
+| `lindblad_vs_heom_comparison.png` | Direct overlay of Lindblad and HEOM mean trapping times at fixed distance |
+| `heom_robustness_heatmap.png` | **Main result** – 20×20 HEOM efficiency map \(\eta(\gamma,r)\) with annotations |
+| `heom_mean_trapping_time_heatmap.png` | 20×20 HEOM mean trapping-time map \(\langle t\rangle(\gamma,r)\) |
+
+Numerical data corresponding to the heatmaps are stored in `results/data/` (`.npy`, `.npz`, `.csv`).
+
+---
+
+## Unit conventions (important)
+
+- Energies and couplings are entered in **cm⁻¹** (spectroscopic convention) and converted internally to rad/ps via  
+  `CM1_TO_RADPS = 2π × 2.99792458×10⁻² ≈ 0.188365`.
+- Time is in **picoseconds (ps)**.
+- Rates (dephasing, relaxation, sink, loss) are in **ps⁻¹**.
+- Temperature is given in kelvin and converted with \(k_B = 0.695\) cm⁻¹ K⁻¹.
+
+This is the standard convention used in photosynthetic open-quantum-system literature (e.g. Ishizaki–Fleming).
+
+---
+
+## Model hierarchy (short)
+
+1. **System Hamiltonian** – N-site Frenkel exciton model.  
+2. **Markovian open system** – Lindblad dephasing + detailed-balance relaxation + Sink + Loss.  
+3. **Distance dependence** – dipole–dipole coupling \(V(r) = V_0 (r_0/r)^3\).  
+4. **Non-Markovian bath** – Hierarchical Equations of Motion (HEOM) with Drude–Lorentz spectral density; Sink/Loss/relaxation kept as Markovian channels injected into the HEOM Liouvillian.
+
+Two complementary parameter sets are used deliberately:
+- Realistic Cy3/Cy5 energies (large \(\Delta E\)) – for experimental relevance.
+- Near-resonant “canonical” dimer (small \(\Delta E\)) – to make the full ENAQT curve (including the Quantum-Zeno branch) clearly visible.
+
+---
+
+## Limitations (honest)
+
+- The realistic Cy3/Cy5 energy gap places the system mainly on the phonon-assisted rising flank of the ENAQT curve; the Zeno regime is not experimentally accessible for that pair.
+- Trapezoidal integration of fast oscillations at short distances requires a sufficiently large number of time steps (validated by cross-checking two independent definitions of \(\eta\)).
+- HEOM hierarchy depth (`max_depth=5`, `Nk=1`) is a speed/accuracy compromise; deeper hierarchies change results by <0.2 %.
+- Absolute output paths in the original scripts must be adjusted for local re-runs.
+
+---
+
+## Quick smoke test
+
+```bash
+python src/quantum_biology_module.py
+```
+
+You should see a success message and two PNG files; total population must remain conserved at 1.0 (no Sink in this basic test).
+
+---
+
+## Contact / context
+
+This computational work forms the in-silico phase of a TÜBİTAK 2204-A high-school research project. The next planned step is laboratory validation of the identified parameter window (\(r \approx 1.4\) nm, \(\gamma \in [10,20]\) ps⁻¹) using dye-labelled DNA constructs and time-resolved fluorescence spectroscopy.

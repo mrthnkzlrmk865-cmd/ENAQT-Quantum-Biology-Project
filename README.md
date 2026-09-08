@@ -111,25 +111,25 @@ All eight figures below are stored in `results/figures/`. Corresponding numerica
 
 **`dynamics_2site.png`** — Population and coherence dynamics of a two-site (Cy3–Cy5-like) system under the Lindblad equation. Excitation starts on the donor, flows to the acceptor, and coherences decay. Total population is conserved.
 
-![Two-site population and coherence dynamics](results/figures/dynamics_2site.png)
+![Two-site population and coherence dynamics](figures/dynamics_2site.png)
 
 **`dynamics_3site.png`** — Same framework applied to a three-site (FMO-inspired) chain. Demonstrates that the model scales cleanly beyond a simple dimer.
 
-![Three-site population dynamics](results/figures/dynamics_3site.png)
+![Three-site population dynamics](dynamics_3site.png)
 
 ### 6.2 Sink / Loss dynamics and first ENAQT maps (Step 2.2)
 
 **`single_point_sink_loss_dynamics.png`** — Full time evolution at one representative parameter point after the Sink (irreversible trapping at the acceptor) and Loss channels have been added. Shows how population is finally captured by the Sink.
 
-![Single-point dynamics with Sink and Loss](results/figures/single_point_sink_loss_dynamics.png)
+![Single-point dynamics with Sink and Loss](single_point_sink_loss_dynamics.png)
 
 **`enaqt_dual_heatmap.png`** — Two-dimensional Lindblad maps of transfer efficiency η(γ, r) and mean trapping time ⟨t⟩(γ, r) on the near-resonant (canonical) model. Because the Sink is much faster than Loss, η saturates near 1 almost everywhere; the ENAQT signature therefore appears clearly only in the **speed** metric ⟨t⟩.
 
-![Lindblad dual heatmap of eta and mean trapping time](results/figures/enaqt_dual_heatmap.png)
+![Lindblad dual heatmap of eta and mean trapping time](enaqt_dual_heatmap.png)
 
 **`enaqt_1d_regime_slice.png`** — One-dimensional cut of ⟨t⟩ versus γ at fixed distance. Three regimes are labelled: (1) coherent Rabi oscillations (low γ), (2) optimal ENAQT window (intermediate γ), (3) Quantum Zeno suppression (high γ).
 
-![1-D regime slice showing Rabi, ENAQT and Zeno](results/figures/enaqt_1d_regime_slice.png)
+![1-D regime slice showing Rabi, ENAQT and Zeno](enaqt_1d_regime_slice.png)
 
 ### 6.3 Non-Markovian validation (Step 2.3)
 
@@ -140,17 +140,17 @@ Main qualitative message:
 - The minimum ⟨t⟩ itself changes only modestly.
 - The high-γ Quantum-Zeno rise is strongly softened by bath memory → the system becomes **more robust**.
 
-![Lindblad vs HEOM comparison](results/figures/lindblad_vs_heom_comparison.png)
+![Lindblad vs HEOM comparison](lindblad_vs_heom_comparison.png)
 
 ### 6.4 Full 2-D HEOM robustness maps (Step 2.3-extension) — main results
 
 **`heom_robustness_heatmap.png`** — 20 × 20 HEOM efficiency map η(γ, r) over γ ∈ [0.05, 80] ps⁻¹ and r ∈ [1, 5] nm (400 independent HEOM trajectories). High-efficiency regions are clearly visible at short distances.
 
-![HEOM efficiency robustness heatmap](results/figures/heom_robustness_heatmap.png)
+![HEOM efficiency robustness heatmap](heom_robustness_heatmap.png)
 
 **`heom_mean_trapping_time_heatmap.png`** — Corresponding 20 × 20 map of mean trapping time ⟨t⟩(γ, r). This is the central figure of the computational phase: it reveals a broad “fast-transfer plateau” at short-to-intermediate distances and moderate dephasing rates.
 
-![HEOM mean trapping time heatmap](results/figures/heom_mean_trapping_time_heatmap.png)
+![HEOM mean trapping time heatmap](heom_mean_trapping_time_heatmap.png)
 
 ---
 

@@ -111,7 +111,7 @@ All eight figures below are stored in `results/figures/`. Corresponding numerica
 
 **`dynamics_2site.png`** — Population and coherence dynamics of a two-site (Cy3–Cy5-like) system under the Lindblad equation. Excitation starts on the donor, flows to the acceptor, and coherences decay. Total population is conserved.
 
-![Two-site population and coherence dynamics](figures/dynamics_2site.png)
+![Two-site population and coherence dynamics](dynamics_2site.png)
 
 **`dynamics_3site.png`** — Same framework applied to a three-site (FMO-inspired) chain. Demonstrates that the model scales cleanly beyond a simple dimer.
 

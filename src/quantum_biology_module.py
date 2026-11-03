@@ -2,8 +2,8 @@
 =======================================================================
 FAZ 2 - ADIM 2.1: Sistem Hamiltoniyeni ve Açık Kuantum Sistem Modeli
 =======================================================================
-Proje   : DNA-İskele Kromofor Dizilimlerinde Titreşimsel Rezonans
-          Mühendisliği ile ENAQT'nin Deneysel Doğrulanması
+Proje   : Biyomoleküler iskeleli kromofor çiftlerinde çevre-yardımlı
+          enerji transferi (ENAQT): simülasyon ve FRET ile sınır-rejim kontrolü
 Modül   : quantum_biology_module.py
 Amaç    : N-site (donör-akseptör veya multi-kromofor) Frenkel ekziton
           Hamiltoniyenini kurmak, Lindblad Master Equation ile açık
@@ -32,12 +32,27 @@ BİRİM SİSTEMİ (çok önemli - kuantum biyolojide standart yaklaşım):
   vermeden önce bu sabitle çarpıyoruz.
 =======================================================================
 """
+# =====================================================================
+# v1 (ORİJİNAL) SCRIPT — Revizyon v2 notu:
+#   Bu dosya yalnızca yolları göreli hale getirilerek korunmuştur; fizik/
+#   hesap değiştirilmemiştir. v1'in bilinen sorunları (T_MAX kesmesi,
+#   HEOM derinlik 5'in büyük r/γ'da yakınsamaması, γ↔λ eşleştirmesinde
+#   ~2 çarpanı) için bkz. CHANGELOG.md ve src/heom_2d_scan_v2.py.
+# =====================================================================
+
 
 import numpy as np
 import qutip as qt
 import matplotlib.pyplot as plt
 from dataclasses import dataclass, field
 from typing import Optional
+from pathlib import Path
+# Çıktı klasörleri (repo köküne göre göreli; mutlak yol yok)
+_ROOT = Path(__file__).resolve().parents[1]
+FIG_DIR = _ROOT / "results" / "figures"
+DATA_DIR = _ROOT / "results" / "data"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # -----------------------------------------------------------------------
@@ -317,7 +332,7 @@ if __name__ == "__main__":
     model_2site.plot_dynamics(
         tlist, pops, coh,
         labels=["Donör (Cy3)", "Akseptör (Cy5)"],
-        save_path="/home/claude/dynamics_2site.png",
+        save_path=str(FIG_DIR / "dynamics_2site.png"),
         title_suffix=" - 2-Site Donor-Akseptör (Cy3-Cy5)"
     )
 
@@ -347,7 +362,7 @@ if __name__ == "__main__":
     model_3site.plot_dynamics(
         tlist3, pops3, coh3,
         labels=["Site 0 (Donör)", "Site 1 (Ara)", "Site 2 (Akseptör)"],
-        save_path="/home/claude/dynamics_3site.png",
+        save_path=str(FIG_DIR / "dynamics_3site.png"),
         title_suffix=" - 3-Site Multi-Kromofor Sistemi"
     )
 

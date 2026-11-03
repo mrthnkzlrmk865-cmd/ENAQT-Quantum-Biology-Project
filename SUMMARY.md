@@ -1,105 +1,38 @@
-# Scientific Summary — In-Silico Phase
+# Bilimsel Özet — In Silico Aşama (revizyon v2)
 
-**TÜBİTAK 2204-A high-school research project**  
-Environment-Assisted Quantum Transport (ENAQT) in DNA-scaffolded chromophore systems
+**TÜBİTAK 2204-A lise araştırma projesi**
+Biyomoleküler iskeleli kromofor çiftlerinde çevre-yardımlı enerji transferi (ENAQT)
 
-This document summarises the computational results. All figures referred to below are located in `results/figures/`. The corresponding numerical data are in `results/data/`.
-
----
-
-## 1. Research question
-
-In a DNA-scaffolded donor–acceptor chromophore pair, does an intermediate amount of environmental dephasing accelerate excitonic energy transfer compared with the fully coherent (γ → 0) and fully incoherent (γ → ∞) limits?  
-If so, what is the practical window of chromophore distance *r* and dephasing rate *γ* in which this Environment-Assisted Quantum Transport (ENAQT) occurs, and how does bath memory (non-Markovian effects) change the robustness of that window?
+Tüm sayılar `results/tables/` altındaki dosyalardan alınmıştır; her birinin kaynağı parantez içinde verilmiştir. Neyin değiştiği için `CHANGELOG.md` dosyasına bakın.
 
 ---
 
-## 2. Computational approach (step by step)
+## 1. Soru
 
-### Step 2.1 – Basic open quantum system
-- N-site Frenkel exciton Hamiltonian.
-- Lindblad master equation with pure dephasing and detailed-balance relaxation.
-- Verified on a two-site (Cy3–Cy5-like) and a three-site (FMO-inspired) system.
+İki seviyeli bir donör–akseptör modelinde, orta düzeyde dephasing (γ) ortalama yakalanma süresini ⟨t⟩ kısaltıyor mu (ENAQT)? Bu etki hangi mesafede en büyük? Banyo hafızası (HEOM) bunu nasıl değiştiriyor? Model, kararlı-hal FRET deneyinin ölçeceği inkoherent sınıra doğru biçimde iniyor mu?
 
-**Figures:** `dynamics_2site.png`, `dynamics_3site.png`  
-Population flows from donor to acceptor while coherences decay, as expected. Total population is conserved.
+## 2. Yöntem (özet)
 
-### Step 2.2 – Sink, Loss and first parameter scan
-- Added a Sink (reaction-centre) channel that irreversibly traps excitation at the acceptor and a weak Loss channel (fluorescence / non-radiative decay).
-- Introduced distance-dependent dipole–dipole coupling \( V(r) = V_0 (r_0/r)^3 \).
-- Defined two complementary figures of merit:
-  - Transfer efficiency η
-  - Mean trapping time ⟨t⟩
+- Frenkel ekziton dimeri, V(r) = V₀(r₀/r)³; Markov sink/loss/gevşeme kanalları.
+- Dephasing: Lindblad (√γ|n⟩⟨n|) veya HEOM (her sitede Drude–Lorentz, γ_c = 2 rad/ps, λ = γγ_c/2k_BT).
+- v2: η ve ⟨t⟩ sonsuz zamana kadar analitik (∫x dt = −M⁻¹x₀); log-γ ızgarası; HEOM derinlik 11.
+- v2 HEOM kodu (numpy/scipy), v1 QuTiP sonuçlarını 400 noktada |Δη| ≤ 7×10⁻⁵ ile yeniden üretir (`validation_summary.txt`).
+- Yeni metrik: **ENAQT kazancı S(r) = ⟨t⟩(γ=0) / min_γ⟨t⟩**.
 
-**Key observation:** With realistic Cy3/Cy5 parameters the Sink is much faster than Loss, so η saturates near 1 everywhere. The ENAQT signature therefore appears clearly only in the **speed** metric ⟨t⟩.
+## 3. Bulgular (kanonik oyuncak model içinde)
 
-A near-resonant “canonical” dimer (small energy gap) was also studied so that the full ENAQT curve — coherent Rabi oscillations → optimal noise-assisted transfer → Quantum Zeno suppression — becomes visible.
+1. **En hızlı nokta ≠ en çok yardım eden gürültü.** Global min ⟨t⟩ = 2.020 ps, r = 1.00 nm'de ve γ ≈ 0'da (ızgara kenarı). Orada S = 1.000, yani gürültü yardım etmiyor. En büyük kazanç S_max = 3.18, r = 3.30 nm ve γ* ≈ 7.9 ps⁻¹'de. Kazancın yarı-yükseklik aralığı r = 2.5–4.4 nm (`scan_v2_headline.txt`). v1'deki "r ≈ 1.4 nm hedef pencere" iddiası veriyle uyuşmuyordu (v1 CSV'nin kendi minimumu da r = 1.0 nm'deydi) ve geri çekildi.
+2. **~2 ps, Γ_sink'e bağlıdır.** Γ_sink = 0.5 / 1 / 2 ps⁻¹ için en kısa ⟨t⟩ = 3.99 / 2.02 / 1.01 ps, yani ≈ 2/Γ_sink. S_max'ın konumu (r ≈ 3.2–3.4 nm) değişmez, büyüklüğü 2.3–3.6 arasında değişir (`sink_sensitivity.csv`). Bu nedenle ⟨t⟩'nin mutlak değeri deneysel bir tahmin olarak sunulmaz.
+3. **Lindblad ↔ HEOM.** Kullanılan λ–γ eşleştirmesi HEOM'da ~2γ koherans sönümü verir (ölçülen oran 1.97–1.98; `mapping_check.txt`). Bu ölçek farkı düzeltildikten sonra da r = 2 nm'de HEOM optimumu (γ* = 20 ps⁻¹) Lindblad'a göre ~10 kat yüksek γ'dadır ve ⟨t⟩_min biraz daha uzundur (2.465 vs 2.324 ps). γ = 39.8 ps⁻¹'de HEOM 2.52 ps, Markov-eşdeğer Lindblad 4.66 ps verir (`lindblad_vs_heom_v2.txt`). Bu sonuç, *güvenilir aralıkta* yavaş banyonun güçlü gürültüye karşı sistemi daha az yavaşlattığını gösterir.
+4. **Sayısal sınırlar.** v1'in T_MAX = 25 ps kesmesi r ≳ 2 nm'de η ve ⟨t⟩'yi ciddi biçimde bozuyordu (r = 5 nm'de η 0.41–0.59 yerine 0.96–0.97; `validation_summary.txt`). HEOM derinlik 5, büyük r/γ'da %36'ya kadar hatalıdır. γ > 40 ps⁻¹'de kesilmiş HEOM güvenilmezdir (`heom_convergence_summary.txt`). Bu nedenle v1'deki "Zeno rejimi banyo hafızasıyla yumuşar" iddiası bu kurulumla desteklenmez.
+5. **Förster köprüsü.** FRET-benzeri açıklayıcı parametrelerde (ΔE = 1000 cm⁻¹, γ = 200 ps⁻¹) aynı model k ∝ r^−5.996 verir ve E(r), 1/(1+(r/R₀)⁶) eğrisine 0.0005 içinde oturur (R₀ = 4.11 nm; `forster_limit_summary.txt`). Kanonik ENAQT rejimi ise kısa mesafede bu yasadan belirgin biçimde sapar (etkin üs 2 nm'de 3.76).
 
-**Figures:**  
-- `single_point_sink_loss_dynamics.png` – full dynamics at one parameter point  
-- `enaqt_dual_heatmap.png` – Lindblad maps of η(γ,r) and ⟨t⟩(γ,r)  
-- `enaqt_1d_regime_slice.png` – 1-D cut showing the three regimes
+## 4. Laboratuvar aşamasının rolü
 
-On the near-resonant model, a clear minimum of ⟨t⟩ appears at intermediate dephasing.
+Planlanan peptit/protein kararlı-hal FRET deneyi, modelin **inkoherent (Förster) sınırını** test eder: ölçülen E değerleri, ölçümden önce yazılmış E(r) tahminleriyle karşılaştırılacaktır. Deney ENAQT'yi, koheransı veya ps dinamiğini ölçmez; ENAQT bulguları bir **model tahmini** olarak raporlanır.
 
-### Step 2.3 – Non-Markovian validation (HEOM)
-The Markovian (memory-less) assumption of the Lindblad equation was relaxed by replacing the pure-dephasing channel with a Hierarchical Equations of Motion (HEOM) treatment using a Drude–Lorentz spectral density. Sink, Loss and relaxation were kept as Markovian channels injected into the HEOM Liouvillian.
+## 5. Açık noktalar
 
-**Figure:** `lindblad_vs_heom_comparison.png`
-
-| Quantity              | Lindblad          | HEOM (τ_c ≈ 0.5 ps)      |
-|-----------------------|-------------------|--------------------------|
-| Optimal γ             | lower             | shifted to higher values |
-| Minimum ⟨t⟩           | slightly lower    | slightly higher          |
-| High-γ behaviour      | sharp Quantum-Zeno rise | much softer         |
-
-**Interpretation:** Bath memory does **not** make the transfer faster at the optimum; it makes the system **more robust**. The beneficial window widens and the destructive Quantum-Zeno regime is strongly suppressed.
-
-### Step 2.3-extension – Full 2-D HEOM robustness map
-A complete 20 × 20 grid (γ ∈ [0.05, 80] ps⁻¹, r ∈ [1, 5] nm) was computed with the full HEOM model (400 independent simulations, parallelised and checkpointed).
-
-**Figures (main results):**  
-- `heom_robustness_heatmap.png` – efficiency map η(γ,r)  
-- `heom_mean_trapping_time_heatmap.png` – mean trapping-time map ⟨t⟩(γ,r)
-
-**Quantitative findings from the 2-D HEOM scan:**
-- Global minimum of mean trapping time: ⟨t⟩_min ≈ 2.05 ps  
-- Corresponding location: r ≈ 1.4 nm, γ in the approximate range 10–20 ps⁻¹  
-- Efficiency remains high (η ≳ 0.99) throughout this window  
-- Distance *r* has the strongest effect (because V ∝ 1/r³), yet a clear secondary dependence on γ is visible — the ENAQT signature survives in the full non-Markovian treatment.
-
----
-
-## 3. Main conclusions
-
-1. **Target experimental window**  
-   Chromophore separation r ≈ 1.4 nm (roughly 4 DNA base pairs) together with environmental dephasing in the range γ ∈ [10, 20] ps⁻¹ yields the fastest transfer under the HEOM model. This window is the primary prediction to be tested in the laboratory.
-
-2. **Role of bath memory**  
-   Non-Markovian effects do not dramatically accelerate the optimal transfer rate; they protect the system against excessive noise and widen the useful parameter region. This offers a design principle: structured noise can be less harmful than white noise.
-
-3. **Why ordinary FRET looks incoherent**  
-   Realistic Cy3/Cy5 energy gaps place the system on the rising (phonon-assisted) flank of the ENAQT curve. Consequently the Quantum-Zeno branch is experimentally inaccessible for that pair, which explains why conventional FRET is usually described as an incoherent Förster process.
-
----
-
-## 4. What the laboratory phase should test
-
-- Synthesise short DNA constructs that fix a Cy3–Cy5 (or equivalent) pair at approximately 1.4 nm.  
-- Measure time-resolved fluorescence (TCSPC / streak camera) under controlled solvent viscosity or other dephasing-tuning conditions.  
-- Check whether the observed transfer time approaches the ~2 ps scale predicted by the simulations and whether moderate environmental noise improves rather than degrades performance.
-
----
-
-## 5. Limitations and open points
-
-- Hierarchy depth and bath parameters in HEOM are a practical compromise; deeper hierarchies change the numbers only at the sub-percent level.  
-- The realistic Cy3/Cy5 parameter set never shows a pronounced Quantum-Zeno regime inside experimentally relevant dephasing rates.  
-- Direct experimental comparison (which theoretical model — Förster, Redfield, Lindblad or HEOM — best describes the real DNA construct) remains future work.  
-- A homodimer (Cy3–Cy3) control would help confirm the presence of coherent excitonic coupling.
-
----
-
-## 6. Reproducibility
-
-All Python source files, numerical grids and figures are included in this repository. A high-school student can re-run the entire pipeline with the commands listed in `README.md` (QuTiP 5.3, ordinary laptop hardware). The most expensive step (full 20×20 HEOM map) takes a few tens of minutes on a single core and is fully checkpointed.
+- Kanonik parametreler gerçek bir boya çiftine ait değildir. Gerçek çift için ENAQT kazancının ne olduğu ayrı bir sorudur (büyük ΔE'de kazanç beklenmez).
+- Nokta-dipol yaklaşımı < 2 nm'de geçersizdir; κ² modelde yoktur.
+- Yüksek γ'da güvenilir HEOM sonuçları için farklı bir yöntem (ör. terminatörlü HEOM ya da daha kararlı bir banyo açılımı) gerekir.

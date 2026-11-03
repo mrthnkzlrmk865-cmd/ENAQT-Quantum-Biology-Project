@@ -1,0 +1,4 @@
+v1 Lindblad haritası (T_MAX=30 ps) vs sonsuz-zaman Lindblad:
+  r ≤ 1.2 nm'de maks |Δ<t>|/<t> = %0.05 (uygulamalar uyumlu)
+  |Δ<t>|/<t> > %1 olan ilk r = 2.12 nm
+  r = 5.0 nm: η v1 0.446–0.589, sonsuz 0.953–0.968; <t> v1 13.2–14.0 ps, sonsuz 31.9–46.9 ps

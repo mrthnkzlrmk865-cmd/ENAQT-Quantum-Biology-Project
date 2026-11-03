@@ -1,201 +1,230 @@
-# Environment-Assisted Quantum Transport (ENAQT) in DNA-Scaffolded Chromophore Systems
+# Biyomoleküler İskeleli Kromofor Çiftlerinde Çevre-Yardımlı Enerji Transferi (ENAQT)
 
-**In-silico module set for a TÜBİTAK 2204-A high-school research project**
+**Açık kuantum sistem simülasyonu ve kararlı-hal FRET ile sınır-rejim kontrolü**
+TÜBİTAK 2204-A lise araştırma projesi · in silico aşama · **revizyon v2**
 
-This repository contains the complete computational (in-silico) phase of a high-school research project on **environment-assisted quantum transport (ENAQT)** in DNA-scaffolded donor–acceptor chromophore systems. All code, numerical data and figures were produced independently by a high-school student using open-source Python tools (primarily QuTiP 5.3).
+> **Kısaca:** Bir donör–akseptör kromofor çiftinde, orta düzeyde çevresel gürültünün (dephasing) enerji transferini *model içinde* hızlandırıp hızlandırmadığını (ENAQT) Lindblad ve HEOM yöntemleriyle inceliyoruz. Laboratuvar aşamasında ölçülecek olan şey ise ENAQT değil, modelin **inkoherent (Förster) sınırıdır**: peptit/protein iskelede kararlı-hal FRET verimi E(r). ENAQT bu projede **deneysel olarak test edilmemektedir**.
 
-The computational goal is to locate a practical parameter window — chromophore distance *r* and environmental dephasing rate *γ* — in which intermediate noise *accelerates* excitonic energy transfer, and to quantify how bath memory (non-Markovian effects) changes the robustness of that window. These predictions are intended to guide a subsequent laboratory validation with dye-labelled DNA constructs and time-resolved fluorescence spectroscopy (TCSPC).
-
----
-
-## Table of contents
-
-1. [Project structure](#1-project-structure)
-2. [Requirements](#2-requirements)
-3. [How to run the modules](#3-how-to-run-the-modules)
-4. [Unit conventions](#4-unit-conventions)
-5. [Model hierarchy](#5-model-hierarchy)
-6. [Results and figures (complete gallery)](#6-results-and-figures-complete-gallery)
-7. [Key numerical findings](#7-key-numerical-findings)
-8. [Limitations](#8-limitations)
-9. [Next experimental step](#9-next-experimental-step)
-10. [Reproducibility](#10-reproducibility)
+v2 revizyonunda v1'deki bazı sayısal iddialar düzeltildi veya geri çekildi. Ayrıntılar için [CHANGELOG.md](CHANGELOG.md) dosyasına bakın.
 
 ---
 
-## 1. Project structure
+## İçindekiler
+
+1. [Araştırma sorusu ve kapsam](#1-araştırma-sorusu-ve-kapsam)
+2. [Klasör yapısı](#2-klasör-yapısı)
+3. [Kurulum ve çalıştırma](#3-kurulum-ve-çalıştırma)
+4. [Model](#4-model)
+5. [Ana bulgular (v2)](#5-ana-bulgular-v2)
+6. [Simülasyon–FRET köprüsü](#6-simülasyonfret-köprüsü)
+7. [Deney planı](#7-deney-planı)
+8. [Sınırlamalar](#8-sınırlamalar)
+9. [Şekiller](#9-şekiller)
+10. [Yapay zekâ kullanımı beyanı](#10-yapay-zekâ-kullanımı-beyanı)
+11. [Kaynaklar](#11-kaynaklar)
+
+---
+
+## 1. Araştırma sorusu ve kapsam
+
+**Soru (model içi):** İki seviyeli bir donör–akseptör sisteminde, dephasing hızı γ'nın orta değerleri ortalama yakalanma süresini ⟨t⟩ hem tam koherent (γ → 0) hem de çok gürültülü durumlara göre kısaltıyor mu? Bu etki hangi mesafe r aralığında en belirgin? Banyo hafızası (HEOM) sonucu nasıl değiştiriyor?
+
+**Bu proje ne iddia eder:**
+- Seçilen *kanonik* model parametrelerinde ENAQT'nin sayısal imzası ve bunun r'ye bağımlılığı.
+- Aynı modelin FRET-benzeri parametrelerde Förster yasasına (E = 1/(1+(r/R₀)⁶)) indiği.
+- Laboratuvarda bu inkoherent sınırın kararlı-hal FRET ile kontrol edilebileceği.
+
+**Bu proje ne iddia etmez:**
+- Laboratuvarda ENAQT, kuantum koherans veya ps ölçekli dinamik ölçüldüğü.
+- Kanonik modelin (ΔE = 25 cm⁻¹) gerçek bir boya çiftini temsil ettiği.
+- Bir kuantum cihaz/çip tasarlandığı.
+
+## 2. Klasör yapısı
 
 ```
-ENAQT_Quantum_Biology_Project/
-├── README.md                          ← this file
-├── SUMMARY.md                         ← concise scientific narrative
-├── requirements.txt
+├── README.md, SUMMARY.md, CHANGELOG.md, LICENSE, requirements.txt
+├── run_all_v2.sh                       # v2 analiz zincirinin tamamı
 ├── src/
-│   ├── quantum_biology_module.py      # Step 2.1 – Hamiltonian + basic Lindblad dynamics
-│   ├── enaqt_parameter_scan.py        # Step 2.2 – Sink/Loss + 2-D Lindblad scan
-│   ├── heom_nonmarkovian_validation.py# Step 2.3 – Lindblad vs HEOM (fixed r)
-│   └── heom_2d_robustness_scan.py     # Step 2.3-ext – full 20×20 HEOM map
+│   ├── enaqt_core.py                   # v2 çekirdek: numpy/scipy Lindblad + HEOM, sonsuz-zaman η ve ⟨t⟩
+│   ├── analyze_legacy_csv.py           # v1 CSV'den doğrudan sayılar (global min, S(r))
+│   ├── validate_against_legacy_csv.py  # v2 HEOM == v1 QuTiP mi? + kesme hatası
+│   ├── validate_lindblad_v1.py         # v1 Lindblad haritasının kesme hatası
+│   ├── heom_convergence.py             # hiyerarşi derinliği / Matsubara testi
+│   ├── lindblad_heom_mapping_check.py  # γ ↔ λ eşleştirmesindeki ~2 çarpanı
+│   ├── heom_2d_scan_v2.py              # ANA v2 TARAMA: log-γ, sonsuz zaman, S(r)
+│   ├── lindblad_vs_heom_v2.py          # r = 2 nm Lindblad–HEOM karşılaştırmasının tekrarı
+│   ├── sink_sensitivity.py             # Γ_sink = 0.5 / 1 / 2 ps⁻¹
+│   ├── forster_limit.py                # FRET-benzeri rejimde Förster limiti
+│   └── (v1, QuTiP) quantum_biology_module.py, enaqt_parameter_scan.py,
+│        heom_nonmarkovian_validation.py, heom_2d_robustness_scan.py
 └── results/
-    ├── figures/                       # all 8 publication-style PNG plots
-    └── data/                          # numerical grids (.npy, .npz, .csv)
+    ├── figures/   # v1 ve v2 şekilleri (v2 adlarında "v2" ya da yeni ad)
+    ├── data/      # v1 ham verileri (değiştirilmedi) + heom_2d_scan_v2.csv
+    └── tables/    # README'deki her sayının kaynağı olan küçük tablolar
 ```
 
-The four source modules build on one another (2.1 → 2.2 → 2.3 → 2.3-ext). Each can also be executed independently.
+v1 scriptlerinde yalnızca çıktı yolları göreli hale getirildi; fizik ve hesap değiştirilmedi.
 
----
-
-## 2. Requirements
+## 3. Kurulum ve çalıştırma
 
 ```bash
-pip install qutip==5.3.0 numpy matplotlib pandas seaborn tqdm
+pip install -r requirements.txt       # v2 için numpy, scipy, pandas, matplotlib yeterli
+bash run_all_v2.sh                    # tüm v2 tablo ve şekilleri yeniden üretir (~20–40 dk)
+python src/heom_2d_scan_v2.py --reuse # yalnızca tablo/grafikleri yeniden çizer (saniyeler)
 ```
 
-- Python ≥ 3.10  
-- QuTiP ≥ 5.0 (HEOM solver: `qutip.solver.heom`)
+v1 scriptleri (`src/quantum_biology_module.py` vb.) QuTiP 5.3 ister.
 
-**Path note.** Some scripts were originally written with absolute output paths used during development. Before re-running, set the `save_path` / `OUTPUT_DIR` variables inside each script to your local `results/figures/` and `results/data/` directories.
+**Neden v2'de QuTiP yerine kendi HEOM kodumuz var?** v2 hesapları QuTiP kurulamayan bir ortamda yapıldı. Bu yüzden aynı denklemler numpy/scipy ile yeniden yazıldı (`src/enaqt_core.py`). Bu uygulama v1'in QuTiP çıktısını 400 noktanın hepsinde yeniden üretiyor: en büyük fark η'da 7.0×10⁻⁵, ⟨t⟩'de göreli 1.1×10⁻⁴ (`results/tables/validation_summary.txt`). Ek avantajı, η ve ⟨t⟩'nin zaman kesmesi olmadan, sonsuz zamana kadar analitik hesaplanabilmesidir.
 
----
+## 4. Model
 
-## 3. How to run the modules
+| Bileşen | Tanım |
+|---|---|
+| Sistem | 2 site (D, A); H = [[E_D, V], [V, E_A]], V(r) = V₀(r₀/r)³ (nokta-dipol) |
+| Kanonik parametreler | E_D − E_A = 25 cm⁻¹, V₀ = 20 cm⁻¹ @ r₀ = 2 nm, T = 298 K |
+| Markov kanalları | D↔A gevşeme 0.02 ps⁻¹ (detailed balance), **sink** A → yakalama Γ_sink = 1 ps⁻¹, **loss** her siteden 0.001 ps⁻¹ |
+| Lindblad dephasing | √γ \|n⟩⟨n\| (n = D, A) → D–A koheransı γ hızıyla söner |
+| HEOM | Her sitede bağımsız Drude–Lorentz banyosu, γ_c = 2 rad/ps (τ_c = 0.5 ps), λ = γγ_c/(2k_BT), Nk = 1; v2'de derinlik **11** |
+| Metrikler | η = Γ_sink∫P_A dt, ⟨t⟩ = Γ_sink∫t P_A dt / η, **sonsuz zamana kadar** (v2) |
+| ENAQT kazancı | **S(r) = ⟨t⟩(γ = 0) / min_γ ⟨t⟩(γ, r)**; S = 1 ise gürültü hiç yardım etmiyor |
 
-| Step | Command | What it does | Typical runtime |
-|------|---------|--------------|-----------------|
-| 2.1 | `python src/quantum_biology_module.py` | N-site Frenkel Hamiltonian + Lindblad dephasing/relaxation; 2-site and 3-site dynamics | ~5–10 s |
-| 2.2 | `python src/enaqt_parameter_scan.py` | Adds Sink + Loss, distance-dependent coupling \(V(r)\propto 1/r^3\), computes η and ⟨t⟩ on a 2-D grid | a few minutes |
-| 2.3 | `python src/heom_nonmarkovian_validation.py` | Fixed-distance Lindblad vs HEOM comparison (Drude–Lorentz bath) | ~1–2 min |
-| 2.3-ext | `python src/heom_2d_robustness_scan.py` | Full 20×20 HEOM scan (400 independent runs, parallel + checkpointed) | ~25–40 min single-core |
+Sink ve loss "emici" durumlardır; bu yüzden v2'de 2×2 iz-azaltan bir yoğunluk matrisi kullanılır. Bu yaklaşım v1'in 4×4 modeliyle aynı P_A(t)'yi verir ve hareket denklemi matrisini tersinir yapar: ∫x dt = −M⁻¹x₀, ∫t x dt = M⁻²x₀.
 
-**Quick smoke test**
+## 5. Ana bulgular (v2)
 
-```bash
-python src/quantum_biology_module.py
-```
+Aşağıdaki her sayının kaynağı parantez içinde verilmiştir. Bütün değerler **kanonik oyuncak model** içindir.
 
-You should see a success message and two PNG files; total population must remain 1.0 (no Sink in this basic test).
+### 5.1 "En hızlı nokta" ile "gürültünün en çok yardım ettiği nokta" farklıdır
 
----
+| Ölçüt | Değer | Kaynak |
+|---|---|---|
+| Global min ⟨t⟩ (v2, sonsuz zaman) | **2.020 ps @ r = 1.00 nm, γ ≈ 0** (ızgara kenarı; η = 0.998) | `results/tables/scan_v2_headline.txt` |
+| Aynı noktada ENAQT kazancı | **S = 1.000**: bu mesafede gürültü hiç yardım etmiyor | `results/tables/enaqt_gain_by_r_v2.csv`, r = 1.0 satırı |
+| v1 CSV global min ⟨t⟩ | 2.0527 ps @ r = 1.000 nm, γ = 12.67 ps⁻¹ (v1'deki "r ≈ 1.4 nm" iddiasıyla çelişir) | `results/tables/legacy_csv_global_min.txt` (CSV'de başlıktan sonraki 4. satır) |
+| En büyük ENAQT kazancı (HEOM) | **S_max = 3.18 @ r = 3.30 nm**, γ* = 7.9 ps⁻¹ (⟨t⟩: 20.6 → 6.5 ps) | `scan_v2_headline.txt` |
+| S'nin yarı-yükseklik aralığı | **r = 2.5–4.4 nm** | `scan_v2_headline.txt` |
+| r = 1.4 nm'de kazanç | S = 1.022 (yalnızca %2) | `enaqt_gain_by_r_v2.csv` |
+| Lindblad karşılaştırma | S_max = 2.68 @ r = 3.10 nm | `scan_v2_headline.txt` |
 
-## 4. Unit conventions
+Yorum: Kısa mesafede kaplin güçlüdür ve transfer zaten hızlıdır. ⟨t⟩'yi orada belirleyen şey sink'tir, gürültüye gerek yoktur. ENAQT kazancı, kaplinin enerji farkına göre zayıfladığı orta mesafelerde (≈2.5–4.4 nm) en büyüktür; ama oralarda transfer mutlak olarak daha yavaştır (⟨t⟩_min ≈ 3–19 ps). **v1'deki "r ≈ 1.4 nm, γ ∈ [10, 20] ps⁻¹ hedef pencere" iddiası geri çekilmiştir.**
 
-| Quantity | Input unit | Internal unit |
-|----------|------------|---------------|
-| Energies / couplings | cm⁻¹ | rad/ps via `CM1_TO_RADPS ≈ 0.188365` |
-| Time | — | picoseconds (ps) |
-| Rates (dephasing, sink, loss …) | — | ps⁻¹ |
-| Temperature | kelvin | converted with \(k_B = 0.695\) cm⁻¹ K⁻¹ |
+### 5.2 "~2 ps" fiziksel bir tahmin değildir; Γ_sink seçimine bağlıdır
 
-This is the standard spectroscopic convention used in photosynthetic open-quantum-system literature (Ishizaki–Fleming and related work).
+| Γ_sink (ps⁻¹) | 1/Γ_sink (ps) | Global min ⟨t⟩ (ps) | konumu | S_max | S_max'ın r'si |
+|---|---|---|---|---|---|
+| 0.5 | 2.0 | 3.988 | r = 1.0 nm | 3.58 | 3.2 nm |
+| 1.0 | 1.0 | 2.020 | r = 1.0 nm | 3.16 | 3.2 nm |
+| 2.0 | 0.5 | 1.011 | r = 1.0 nm | 2.33 | 3.4 nm |
 
----
+Kaynak: `results/tables/sink_sensitivity.csv`. Bu duyarlılık testi daha seyrek bir ızgara kullanır (r 0.2 nm adımlı, γ ≤ 40 ps⁻¹). Bu yüzden Γ_sink = 1 satırındaki S_max (3.16 @ 3.2 nm), ana taramadaki 3.18 @ 3.30 nm değerinden biraz farklıdır.
 
-## 5. Model hierarchy
+**Sonuç:** En kısa ⟨t⟩ neredeyse tam olarak **2/Γ_sink**'tir. Kısa mesafede uyarılma D ve A arasında yaklaşık eşit paylaşılır ve sink yalnızca A'dan çalışır; bu yüzden etkin yakalama hızı ≈ Γ_sink/2'dir. ENAQT kazancının en büyük olduğu mesafe (r ≈ 3.2–3.4 nm) Γ_sink'e karşı sağlamdır; kazancın büyüklüğü (2.3–3.6) ise Γ_sink'e bağlıdır.
 
-1. **System** – N-site Frenkel exciton Hamiltonian.  
-2. **Markovian open system** – Lindblad pure dephasing + detailed-balance relaxation + irreversible Sink (reaction centre) + weak Loss (fluorescence / non-radiative decay).  
-3. **Distance dependence** – dipole–dipole coupling \(V(r) = V_0(r_0/r)^3\).  
-4. **Non-Markovian bath** – Hierarchical Equations of Motion (HEOM) with Drude–Lorentz spectral density; Sink/Loss/relaxation kept as Markovian channels injected into the HEOM Liouvillian.
+Model içinde ⟨t⟩, en az sink'e "bekleme" süresi 1/Γ_sink kadardır. Γ_sink = 1 ps⁻¹ bir model seçimidir, ölçülmüş bir değer değildir. Bu yüzden **"deneyde ~2 ps doğrulanacak" ifadesi kaldırılmıştır**. Kararlı-hal FRET zaten ps zaman ölçeğini ölçmez.
 
-Two complementary parameter sets are used on purpose:
+### 5.3 Lindblad ↔ HEOM karşılaştırması: ölçek farkı ve banyo hafızası
 
-- **Realistic Cy3/Cy5 energies** (large ΔE) → experimental relevance.  
-- **Near-resonant “canonical” dimer** (small ΔE) → makes the full ENAQT curve (Rabi → optimum → Quantum Zeno) clearly visible.
+- **γ ↔ λ eşleştirmesinde ~2 çarpanı:** λ = γγ_c/(2k_BT) ile HEOM, D–A koheransını Lindblad'ın aynı γ değerine göre yaklaşık **2 kat hızlı** söndürür. Ölçülen oran 1.97–1.98, analitik değer 2γ (`results/tables/mapping_check.txt`). Yani v1'deki "aynı x-ekseni" karşılaştırması tam adil değildi.
+- **r = 2 nm, sonsuz zaman, HEOM derinlik 11** (`results/tables/lindblad_vs_heom_v2.txt`):
+  - HEOM: γ* = 20 ps⁻¹, ⟨t⟩_min = 2.465 ps
+  - Lindblad (aynı γ): γ* = 3.98 ps⁻¹, ⟨t⟩_min = 2.324 ps
+  - Lindblad (2γ, Markov-eşdeğer): HEOM ekseninde γ* = 2 ps⁻¹. Ölçek düzeltildikten sonra bile optimum ~10 kat kayıktır; bu kısım yavaş banyonun (hafıza) etkisidir.
+  - γ = 39.8 ps⁻¹'de ⟨t⟩: HEOM 2.52 ps, Lindblad(2γ) 4.66 ps. Güvenilir aralıkta HEOM, güçlü gürültüye karşı daha az yavaşlıyor.
+- **v1'deki "yüksek γ'da Zeno yükselişi banyo hafızasıyla belirgin biçimde yumuşar" iddiası bu kurulumla desteklenmiyor**, çünkü γ > 40 ps⁻¹'de HEOM sonuçları sayısal olarak güvenilmez (§5.4).
 
----
+### 5.4 Sayısal güvenilirlik
 
-## 6. Results and figures (complete gallery)
+- **Zaman kesmesi (v1):** v1'de η ve ⟨t⟩, T_MAX = 25 ps'de kesilen trapez integralinden hesaplanıyordu. r = 5 nm'de η 0.41–0.59 görünüyordu; aynı model (derinlik 5) sonsuz zamanda 0.96–0.97 veriyor. ⟨t⟩ ise 11–12 ps'de tavana takılıyordu; gerçek değer 27–44 ps (`results/tables/validation_summary.txt`, `truncation_error_by_r.csv`). v1 Lindblad haritası da r ≳ 2.1 nm'de aynı sorunu taşıyor (`validation_lindblad_v1.txt`). r = 1 nm'de ise 220 zaman adımı hızlı salınımları çözemediği için η'da ~0.009 hata vardı.
+- **HEOM hiyerarşi derinliği:** v1'in derinlik 5 ayarı kısa mesafede yeterlidir (r = 1.4 nm'de ≤ %0.5), orta/büyük mesafede değildir. Derinlik 13'e göre ⟨t⟩ hatası γ ≤ 40 ps⁻¹'de %6.4'e, γ = 100 ps⁻¹'de %36'ya kadar çıkar. Derinlik 11, γ ≤ 40 ps⁻¹'de tüm test noktalarında derinlik 13'e göre %1'in altındadır (en kötü %0.87). Daha yüksek γ'da kesilmiş hiyerarşi kararsızlaşabilir: r = 4.5 nm, γ = 50 ps⁻¹'de derinlik 15, η = 2.12 gibi fiziksel olmayan bir değer veriyor. v2 taramasında da γ = 100 ps⁻¹'de η > 1 noktası çıktı. Bu yüzden HEOM sonuçları yalnızca **γ ≤ 40 ps⁻¹** için raporlanır (`results/tables/heom_convergence_summary.txt`, `scan_v2_headline.txt`).
+- **Matsubara terimi:** Nk = 3'e göre ⟨t⟩ farkı Nk = 0'da ≤ %0.19, Nk = 1'de ≤ %0.05. Nk = 1 yeterlidir.
+- **v1'deki "<%0.2 yakınsama" iddiası geri çekilmiştir:** yalnızca kısa mesafede doğrudur ve bunu destekleyen script/tablo yoktu.
 
-All eight figures below are stored in `results/figures/`. Corresponding numerical arrays live in `results/data/`.
+## 6. Simülasyon–FRET köprüsü
 
-### 6.1 Basic dynamics (Step 2.1)
+**Absolute (kararlı-hal) FRET ne ölçer?** Donörden akseptöre aktarılan uyarılma kesrini, yani transfer verimi **E**'yi. E, donör sönümleme (E = 1 − F_DA/F_D) veya düzeltilmiş duyarlılaştırılmış akseptör emisyonu ile bulunur. Zaman çözünürlüğü (TCSPC) gerekmez.
 
-**`dynamics_2site.png`** — Population and coherence dynamics of a two-site (Cy3–Cy5-like) system under the Lindblad equation. Excitation starts on the donor, flows to the acceptor, and coherences decay. Total population is conserved.
+**Ne ölçmez?** ps dinamiğini, koherans salınımlarını veya ENAQT'yi. FRET boyaları/proteinleri büyük enerji farkı, zayıf kaplin ve çok güçlü dephasing rejimindedir. Bu rejim kanonik ENAQT modelinden çok uzaktır.
 
-![Two-site population and coherence dynamics](dynamics_2site.png)
+**Köprü (`src/forster_limit.py`, `results/tables/forster_limit_summary.txt`):** Aynı Lindblad modeli, açıklayıcı FRET-benzeri parametrelerle (ΔE = 1000 cm⁻¹, γ = 200 ps⁻¹, V₀ = 20 cm⁻¹ @ 2 nm, k_D = 0.001 ps⁻¹, akseptörde hızlı yakalama) çalıştırıldı:
+- r = 2–10 nm'de log k – log r eğimi **−5.996** (Förster: −6).
+- R₀ (k_T = k_D) = **4.11 nm**. Model verimi ile 1/(1+(r/R₀)⁶) arasındaki en büyük fark **0.0005**.
+- Transfer hızı Haken–Strobl formülü k = 2V²Γ/(Γ² + ΔE²) ile %1.5 içinde uyumlu.
+- Karşılaştırma: kanonik ENAQT rejiminde etkin mesafe üssü r = 1 nm'de 0.28, 2 nm'de 3.76, 3 nm'de 5.70. Kısa mesafede Förster yasası geçerli değildir.
 
-**`dynamics_3site.png`** — Same framework applied to a three-site (FMO-inspired) chain. Demonstrates that the model scales cleanly beyond a simple dimer.
+Bu parametreler belirli bir boya/protein çiftinin ölçülmüş değerleri **değildir**; amaç modelin doğru sınıra indiğini göstermektir. Gerçek çift için R₀ spektral örtüşme, donör kuantum verimi, kırılma indisi ve κ² ile ayrıca hesaplanmalıdır.
 
-![Three-site population dynamics](dynamics_3site.png)
+**Dürüst çerçeve:** Deney, modelin **inkoherent sınırını** doğrular ("model, ölçülen FRET verimini yeniden üretiyor mu?"). ENAQT penceresi deneyle test edilmemiş bir **model tahmini** olarak raporlanır.
 
-### 6.2 Sink / Loss dynamics and first ENAQT maps (Step 2.2)
+## 7. Deney planı
 
-**`single_point_sink_loss_dynamics.png`** — Full time evolution at one representative parameter point after the Sink (irreversible trapping at the acceptor) and Loss channels have been added. Shows how population is finally captured by the Sink.
+Plan: ODTÜ'de peptit/protein iskelesiyle **kararlı-hal (absolute) FRET**. DNA iskelesi, Cy3/Cy5 boyaları ve TCSPC **zorunlu değildir**.
 
-![Single-point dynamics with Sink and Loss](single_point_sink_loss_dynamics.png)
+1. **Yapılar** (laboratuvarın olanaklarına göre biri):
+   - Farklı uzunlukta rijit bağlayıcılı (ör. poliprolin) donör–akseptör peptitleri. Poliprolinin esnekliği ve mesafe dağılımı bir sınırlamadır.
+   - Kısa ve uzun bağlayıcılı floresan protein füzyonları.
+   - En basit sürüm: **donör-yalnız kontrol + D–A yapısı** (tek mesafe).
+2. **Kontroller:** donör-yalnız, akseptör-yalnız (doğrudan uyarılma/sızma düzeltmesi), tampon boşluğu, konsantrasyon eşleme (absorbans).
+3. **Ölçüm:** Kararlı-hal floresans spektrumları; E = 1 − F_DA/F_D ve/veya düzeltilmiş duyarlılaştırılmış emisyon. Her yapı için en az 3 bağımsız tekrar ve hata çubukları.
+4. **Tahmin (ölçümden ÖNCE yazılıp kaydedilecek):** Her yapı için yapısal tahminden r ± belirsizlik, literatür/ölçümden R₀ (κ² = 2/3 varsayımıyla) ve E_tahmin = 1/(1+(r/R₀)⁶).
+5. **Başarı ölçütü (önceden):** Ölçülen E, tahmin edilen E ile belirsizlikler içinde (ör. |ΔE| ≤ 0.1) uyumlu olmalı ve kısa/uzun bağlayıcı sıralaması doğru çıkmalı.
+6. **Kaçınılacak iddialar:** "Viskozite/sıcaklıkla γ'yı ayarladık" (elektronik dephasing fs ölçeğindedir; viskozite daha çok boya dönmesini ve κ²'yi etkiler), "ENAQT/koherans ölçtük", "~2 ps'yi doğruladık".
 
-**`enaqt_dual_heatmap.png`** — Two-dimensional Lindblad maps of transfer efficiency η(γ, r) and mean trapping time ⟨t⟩(γ, r) on the near-resonant (canonical) model. Because the Sink is much faster than Loss, η saturates near 1 almost everywhere; the ENAQT signature therefore appears clearly only in the **speed** metric ⟨t⟩.
+## 8. Sınırlamalar
 
-![Lindblad dual heatmap of eta and mean trapping time](enaqt_dual_heatmap.png)
+- Kanonik model (ΔE = 25 cm⁻¹) bir **oyuncak modeldir**; gerçek bir kromofor çiftinin parametreleri değildir.
+- V ∝ 1/r³ nokta-dipol yaklaşımı ~2 nm'nin altında güvenilmezdir (kromoforlar bu boyuttadır). κ² yönelim faktörü modelde yoktur.
+- Γ_sink, Γ_loss ve gevşeme hızları seçilmiş değerlerdir; ⟨t⟩'nin mutlak değeri bunlara bağlıdır (§5.2).
+- HEOM sonuçları yalnızca γ ≤ 40 ps⁻¹ için güvenilirdir (§5.4). Bu kurulumla Zeno rejimi hakkında güvenilir HEOM sonucu yoktur.
+- Lindblad/Haken–Strobl dephasing sonsuz sıcaklık sınırıdır; FRET köprüsünde detailed balance yoktur.
+- v2 HEOM uygulaması QuTiP ile yalnızca derinlik 5'te karşılaştırıldı. Daha derin hiyerarşiler aynı denklemlerin doğrudan genişlemesidir ama ayrıca QuTiP ile karşılaştırılmadı.
+- Hangi modelin (Förster / Redfield / Lindblad / HEOM) gerçek yapıyı en iyi anlattığı deneysel bir sorudur; planlanan FRET deneyi yalnızca Förster sınırını test eder.
 
-**`enaqt_1d_regime_slice.png`** — One-dimensional cut of ⟨t⟩ versus γ at fixed distance. Three regimes are labelled: (1) coherent Rabi oscillations (low γ), (2) optimal ENAQT window (intermediate γ), (3) Quantum Zeno suppression (high γ).
+## 9. Şekiller
 
-![1-D regime slice showing Rabi, ENAQT and Zeno](enaqt_1d_regime_slice.png)
+### v2 (güncel)
 
-### 6.3 Non-Markovian validation (Step 2.3)
+**ENAQT kazancı S(r).** Gürültünün transferi en çok hızlandırdığı mesafe; HEOM ve Lindblad karşılaştırmalı.
+![S(r)](results/figures/enaqt_gain_S_vs_r.png)
 
-**`lindblad_vs_heom_comparison.png`** — Direct overlay of mean trapping time versus dephasing rate for the Markovian Lindblad equation and the non-Markovian HEOM (Drude–Lorentz bath, τ_c ≈ 0.5 ps) at fixed chromophore distance.
+**HEOM ⟨t⟩(γ, r), sonsuz zaman, log-γ.** Turuncu çizgi γ*(r); taralı bölge (γ > 40 ps⁻¹) HEOM'un güvenilmez olduğu yer.
+![HEOM v2 heatmap](results/figures/heom_v2_mean_time_heatmap.png)
 
-Main qualitative message:
-- The location of the optimum shifts.
-- The minimum ⟨t⟩ itself changes only modestly.
-- The high-γ Quantum-Zeno rise is strongly softened by bath memory → the system becomes **more robust**.
+**Lindblad vs HEOM, r = 2 nm (v2).** Aynı-γ ve 2γ (Markov-eşdeğer) Lindblad eğrileri.
+![Lindblad vs HEOM v2](results/figures/lindblad_vs_heom_v2.png)
 
-![Lindblad vs HEOM comparison](lindblad_vs_heom_comparison.png)
+**Förster limiti.** FRET-benzeri parametrelerde model → 1/(1+(r/R₀)⁶); sağda etkin mesafe üssü.
+![Förster limiti](results/figures/forster_limit_check.png)
 
-### 6.4 Full 2-D HEOM robustness maps (Step 2.3-extension) — main results
+### v1 (arşiv; bilinen sorunlarla birlikte)
 
-**`heom_robustness_heatmap.png`** — 20 × 20 HEOM efficiency map η(γ, r) over γ ∈ [0.05, 80] ps⁻¹ and r ∈ [1, 5] nm (400 independent HEOM trajectories). High-efficiency regions are clearly visible at short distances.
+| Şekil | Durum |
+|---|---|
+| `dynamics_2site.png`, `dynamics_3site.png` | Temel Lindblad dinamiği; sorun bilinmiyor. |
+| `single_point_sink_loss_dynamics.png` | Tek nokta dinamiği; sorun bilinmiyor. |
+| `enaqt_1d_regime_slice.png` | Niteliksel olarak geçerli (Lindblad, kısa r). |
+| `enaqt_dual_heatmap.png` | r ≳ 2.1 nm'de T_MAX kesmesinden etkilenir (`validation_lindblad_v1.txt`). |
+| `lindblad_vs_heom_comparison.png` | HEOM derinlik 5, aynı-γ ekseni (2 çarpanı) ve γ > 40'ta güvenilmez HEOM noktaları içerir; yerine `lindblad_vs_heom_v2.png`. |
+| `heom_robustness_heatmap.png`, `heom_mean_trapping_time_heatmap.png` | T_MAX kesmesi (r ≳ 2 nm) ve derinlik 5; yerine `heom_v2_mean_time_heatmap.png`. |
 
-![HEOM efficiency robustness heatmap](heom_robustness_heatmap.png)
+## 10. Yapay zekâ kullanımı beyanı
 
-**`heom_mean_trapping_time_heatmap.png`** — Corresponding 20 × 20 map of mean trapping time ⟨t⟩(γ, r). This is the central figure of the computational phase: it reveals a broad “fast-transfer plateau” at short-to-intermediate distances and moderate dephasing rates.
+Bu depodaki kodun ve dokümantasyonun hazırlanmasında yapay zekâ asistanlarından yararlanılmıştır. Bu kullanım kod yazımı, hata ayıklama ve metin düzenlemesini kapsar. v2 revizyonu (yeni analiz scriptleri, yeniden hesaplamalar, bu README, SUMMARY ve CHANGELOG) bir yapay zekâ asistanıyla (Anthropic Claude) birlikte hazırlanmıştır.
 
-![HEOM mean trapping time heatmap](heom_mean_trapping_time_heatmap.png)
+**Öğrencinin katkısı:** *[Öğrenci tarafından kendi cümleleriyle doldurulacak: ör. araştırma sorusunun seçimi, model ve parametre kararları, sonuçların yorumu, deney tasarımı, laboratuvar bağlantısı.]*
 
----
+Jüri sunumunda kodun her adımını (ör. HEOM'un ne olduğu, λ–γ eşleştirmesi, neden sonsuz-zaman integrali kullanıldığı) öğrencinin kendisinin açıklayabilmesi hedeflenmektedir.
 
-## 7. Key numerical findings
+## 11. Kaynaklar
 
-From the full HEOM 2-D scan (`results/data/heom_2d_scan_results.csv` and the associated `.npy` grids):
+- Förster, T. (1948). *Ann. Phys.* 437, 55–75.
+- Haken, H. & Strobl, G. (1973). *Z. Phys.* 262, 135–148.
+- Stryer, L. & Haugland, R. P. (1967). *PNAS* 58, 719–726.
+- Schuler, B. et al. (2005). *PNAS* 102, 2754–2759.
+- Plenio, M. B. & Huelga, S. F. (2008). *New J. Phys.* 10, 113019.
+- Rebentrost, P. et al. (2009). *New J. Phys.* 11, 033003.
+- Ishizaki, A. & Fleming, G. R. (2009). *J. Chem. Phys.* 130, 234111.
+- Tanimura, Y. (2020). *J. Chem. Phys.* 153, 020901.
+- Lambert, N. et al. (2023). *Phys. Rev. Research* 5, 013181 (QuTiP-BoFiN / HEOM).
 
-| Quantity | Value |
-|----------|--------|
-| Global minimum of ⟨t⟩ | ≈ 2.05 ps |
-| Efficiency throughout the fast window | η ≳ 0.99 |
-| Practical target window suggested for experiment | r ≈ 1.4 nm, γ ∈ [10, 20] ps⁻¹ |
-| Strongest control parameter | distance r (because V ∝ 1/r³) |
-| Secondary but clear control parameter | dephasing rate γ (ENAQT signature) |
-
-**Interpretation of bath memory**  
-Non-Markovian effects do **not** dramatically accelerate the optimal transfer rate; they protect the system against excessive noise and widen the useful parameter region. Structured (coloured) noise is less harmful than white noise.
-
-**Why ordinary FRET looks incoherent**  
-Realistic Cy3/Cy5 energy gaps place the system on the phonon-assisted rising flank of the ENAQT curve. The Quantum-Zeno branch is therefore experimentally inaccessible for that pair, which explains why conventional FRET is usually described as an incoherent Förster process.
-
----
-
-## 8. Limitations
-
-- HEOM hierarchy depth (`max_depth=5`, `Nk=1`) is a deliberate speed/accuracy compromise; deeper hierarchies change results by < 0.2 %.  
-- The realistic Cy3/Cy5 parameter set never shows a pronounced Quantum-Zeno regime inside experimentally relevant dephasing rates.  
-- Trapezoidal integration of fast oscillations at very short distances requires a sufficiently large number of time steps (cross-validated by two independent definitions of η).  
-- Absolute output paths in the original scripts must be adjusted for local re-runs.  
-- Which theoretical model (Förster / Redfield / Lindblad / HEOM) best describes a real DNA construct remains an open experimental question.
-
----
-
-## 9. Next experimental step
-
-The computational phase points to a concrete laboratory target:
-
-1. Synthesise short DNA constructs that fix a Cy3–Cy5 (or equivalent) pair at approximately **1.4 nm** (≈ 4 base pairs).  
-2. Measure time-resolved fluorescence (TCSPC or streak camera) under controlled solvent conditions that tune environmental dephasing (e.g. viscosity).  
-3. Test whether the observed transfer time approaches the ~2 ps scale predicted by the simulations and whether moderate environmental noise improves, rather than degrades, performance.
-
----
-
-## 10. Reproducibility
-
-All source code, numerical grids and figures are included in this repository. The entire pipeline can be re-run by a high-school student on ordinary laptop hardware (QuTiP 5.3). The most expensive step — the full 20 × 20 HEOM map — takes a few tens of minutes on a single core and is fully checkpointed, so interrupted runs can be resumed.
-
-For the scientific narrative that accompanies these results, see **`SUMMARY.md`**.
+Lisans: MIT (bkz. `LICENSE`).

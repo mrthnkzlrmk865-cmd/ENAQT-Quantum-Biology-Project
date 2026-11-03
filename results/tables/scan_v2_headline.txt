@@ -1,0 +1,14 @@
+HEOM v2 (sonsuz zaman, log-γ 0.01–100 ps^-1, Γ_sink = 1 ps^-1, depth = 11, Nk = 1;
+         HEOM için yalnızca γ ≤ 40 ps^-1 kullanıldı):
+  En hızlı nokta (global min <t>): <t> = 2.020 ps @ r = 1.00 nm, γ = 0.01 ps^-1, η = 0.9980
+  En büyük ENAQT kazancı: S = 3.18 @ r = 3.30 nm (γ* = 7.94 ps^-1, <t>(0) = 20.56 ps -> <t>min = 6.46 ps)
+  S'nin yarı-yükseklik aralığı (S-1 ≥ (Smax-1)/2): r = 2.50–4.40 nm
+  r = 1.00 nm: S = 1.000, <t>min = 2.02 ps, γ* = 0 ps^-1, η(opt) = 0.9980
+  r = 1.40 nm: S = 1.022, <t>min = 2.13 ps, γ* = 20 ps^-1, η(opt) = 0.9979
+  r = 2.00 nm: S = 1.404, <t>min = 2.47 ps, γ* = 20 ps^-1, η(opt) = 0.9975
+  r = 3.00 nm: S = 3.059, <t>min = 4.78 ps, γ* = 7.94 ps^-1, η(opt) = 0.9952
+  r = 4.00 nm: S = 2.555, <t>min = 13.24 ps, γ* = 7.94 ps^-1, η(opt) = 0.9868
+  r = 5.00 nm: S = 1.603, <t>min = 27.47 ps, γ* = 7.94 ps^-1, η(opt) = 0.9726
+  Lindblad karşılaştırma: Smax = 2.68 @ r = 3.10 nm (γ* = 3.98 ps^-1)
+  η aralığı (HEOM, güvenilir γ): 0.9561 – 0.9980
+  γ > 40 ps^-1 (dışlanan) HEOM noktalarında η aralığı: 0.9329 – 1.0039  (η > 1 -> sayısal kararsızlık)

@@ -34,6 +34,11 @@ DAHA DA MI hızlandırıyor?
 
         gamma_Lindblad_esdeğer = 2 * lambda * k_B*T / (hbar * gamma_c)
 
+    v2 notu: Bu ilişki TEK bir sitenin Re∫C(t)dt değeridir. Lindblad'da
+    sqrt(gamma)|n><n| iki sitede koheransı gamma hızıyla söndürür; HEOM'da
+    iki bağımsız banyo ~2*gamma verir (src/lindblad_heom_mapping_check.py).
+    Yani iki eğrinin x-eksenleri arasında ~2 kat ölçek farkı vardır.
+
     Bu ilişkiyi TERSİNE çevirip, Adım 2.2'de taranan HER gamma değeri
     için "aynı Markovian limitte eşdeğer" bir lambda hesaplıyoruz:
 
@@ -52,19 +57,34 @@ DAHA DA MI hızlandırıyor?
 -----------------------------------------------------------------------
 (3) HESAPLAMA PERFORMANSI
 -----------------------------------------------------------------------
-    Yakınsama testi (bu modülü üretmeden önce yapıldı):
-      max_depth=4, Nk=1  -> 1.6-1.8 s/nokta
-      max_depth=6, Nk=2  -> 180+ s/nokta (referans/altın standart)
-      Fark: <t> değerlerinde <%0.2 sapma (2.738 vs 2.735 ps gibi)
-    Üretim ayarı: max_depth=5, Nk=1 (hız/doğruluk dengesi, ~3.6 s/nokta)
+    Üretim ayarı: max_depth=5, Nk=1.
+    v2 notu: Önceki sürümde burada belgelenmeden '<%0.2 sapma' iddiası
+    vardı. src/heom_convergence.py ile test edildi: r = 1.4 nm'de doğru,
+    ancak büyük r ve büyük γ'da derinlik 5 yakınsamamıştır (bkz.
+    results/tables/heom_convergence_summary.txt). İddia geri çekildi.
 =======================================================================
 """
+# =====================================================================
+# v1 (ORİJİNAL) SCRIPT — Revizyon v2 notu:
+#   Bu dosya yalnızca yolları göreli hale getirilerek korunmuştur; fizik/
+#   hesap değiştirilmemiştir. v1'in bilinen sorunları (T_MAX kesmesi,
+#   HEOM derinlik 5'in büyük r/γ'da yakınsamaması, γ↔λ eşleştirmesinde
+#   ~2 çarpanı) için bkz. CHANGELOG.md ve src/heom_2d_scan_v2.py.
+# =====================================================================
+
 
 import numpy as np
 import qutip as qt
 from qutip.solver.heom import HEOMSolver, DrudeLorentzBath
 import matplotlib.pyplot as plt
 import time
+from pathlib import Path
+# Çıktı klasörleri (repo köküne göre göreli; mutlak yol yok)
+_ROOT = Path(__file__).resolve().parents[1]
+FIG_DIR = _ROOT / "results" / "figures"
+DATA_DIR = _ROOT / "results" / "data"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Sabitler (önceki adımlarla tutarlı) ---
 C_LIGHT_CM_PER_PS = 2.99792458e-2
@@ -288,12 +308,12 @@ if __name__ == "__main__":
     axes[1].grid(alpha=0.3, which='both')
 
     plt.tight_layout()
-    plt.savefig("/home/claude/lindblad_vs_heom_comparison.png", dpi=300)
+    plt.savefig(FIG_DIR / "lindblad_vs_heom_comparison.png", dpi=300)
     plt.close()
-    print("\n[OK] Karşılaştırma grafiği kaydedildi: "
-          "/home/claude/lindblad_vs_heom_comparison.png")
+    print("\n[OK] Karşılaştırma grafiği kaydedildi:",
+          FIG_DIR / "lindblad_vs_heom_comparison.png")
 
-    np.savez("/home/claude/lindblad_vs_heom_data.npz",
+    np.savez(DATA_DIR / "lindblad_vs_heom_data.npz",
               gamma_range=gamma_range,
               mean_t_lindblad=mean_t_lindblad, eta_lindblad=eta_lindblad,
               mean_t_heom=mean_t_heom, eta_heom=eta_heom)

@@ -38,6 +38,14 @@ Tek çekirdekli bir makinede TAM tarama ~25-40 dakika alabilir; çok
 N_GAMMA / N_R sabitlerini küçülterek hızlı bir ön-test yapılabilir.
 =========================================================================
 """
+# =====================================================================
+# v1 (ORİJİNAL) SCRIPT — Revizyon v2 notu:
+#   Bu dosya yalnızca yolları göreli hale getirilerek korunmuştur; fizik/
+#   hesap değiştirilmemiştir. v1'in bilinen sorunları (T_MAX kesmesi,
+#   HEOM derinlik 5'in büyük r/γ'da yakınsamaması, γ↔λ eşleştirmesinde
+#   ~2 çarpanı) için bkz. CHANGELOG.md ve src/heom_2d_scan_v2.py.
+# =====================================================================
+
 
 # -------------------------------------------------------------------
 # KRİTİK: BLAS/OpenMP thread sayısını, ProcessPoolExecutor ile çoklu
@@ -77,6 +85,13 @@ except ImportError:
 
 import qutip as qt
 from qutip.solver.heom import HEOMSolver, DrudeLorentzBath
+from pathlib import Path
+# Çıktı klasörleri (repo köküne göre göreli; mutlak yol yok)
+_ROOT = Path(__file__).resolve().parents[1]
+FIG_DIR = _ROOT / "results" / "figures"
+DATA_DIR = _ROOT / "results" / "data"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # =========================================================================
@@ -109,26 +124,28 @@ T_MAX_PS = 25.0
 N_TIME_STEPS = 220      # trapezoidal integrasyon için yeterli çözünürlük
                           # (bkz. Adım 2.2'deki aliasing hatası doğrulaması;
                           # burada guclu kaplin r=1nm icin de test edilmis
-                          # ve <1e-3 hata verdigi dogrulanmistir)
+                          # v2 notu: r=1 nm'de dt=0.114 ps hızlı salınımları
+                          # tam çözemez (η'da ~0.009 hata), büyük r'de
+                          # T_MAX=25 ps kesmesi baskındır; bkz. CHANGELOG)
 
 # =========================================================================
 # 2) TARANACAK 2D GRID TANIMI
 # =========================================================================
 GAMMA_MIN_PSINV = 0.05
 GAMMA_MAX_PSINV = 80.0
-N_GAMMA = 20                     # "20 eşit aralıklı nokta" (kullanıcı talebi)
+N_GAMMA = 20                     # 20 eşit aralıklı nokta
 GAMMA_LOG_SPACING = False        # True yapılırsa np.logspace kullanılır --
                                   # düşük-gamma (Rabi) rejimini daha iyi
-                                  # çözümler; varsayılan, talep edilen
+                                  # çözümler; varsayılan,
                                   # DOĞRUSAL (eşit aralıklı) ızgaradır.
 
 R_MIN_NM = 1.0
 R_MAX_NM = 5.0
 N_R = 20                         # "20 eşit aralıklı nokta"
 
-N_WORKERS = os.cpu_count() or 1  # mevcut CPU çekirdek sayısı (bu sandbox'ta 1)
+N_WORKERS = os.cpu_count() or 1  # mevcut CPU çekirdek sayısı
 
-OUTPUT_DIR = "/home/claude"
+OUTPUT_DIR = str(DATA_DIR)       # .npy/.csv/checkpoint; şekiller FIG_DIR'e
 
 
 # =========================================================================
@@ -206,6 +223,8 @@ def compute_single_point(task):
         L = build_liouvillian(r_nm)
 
         kT_radps = KB_CM1_PER_K * T_KELVIN * CM1_TO_RADPS
+        # v2 notu: bu eşleştirme iki sitede toplam ~2*gamma koherans sönümü
+        # verir (Lindblad: gamma); bkz. src/lindblad_heom_mapping_check.py
         # Haken-Strobl eşleştirmesi: gamma (fenomenolojik Lindblad hızı)
         # <-> lambda (mikroskopik HEOM reorganizasyon enerjisi)
         #     lambda = gamma * gamma_c / (2 * kT)
@@ -285,7 +304,7 @@ def run_2d_heom_scan(gamma_range, r_range, n_workers=N_WORKERS, checkpoint_every
 
     print(f"[BAŞLIYOR] {len(tasks)} HEOM simülasyonu (toplam {len(all_tasks)}'ten kalan), "
           f"{n_workers} paralel işçi ile...")
-    print(f"           (Bu sandbox'ta {os.cpu_count()} CPU çekirdeği mevcut.)")
+    print(f"           ({os.cpu_count()} CPU çekirdeği mevcut.)")
 
     failed_points = []
     t0 = time.time()
@@ -381,7 +400,7 @@ def save_results(gamma_range, r_range, eta_grid, mean_time_grid, output_dir=OUTP
 # 7) YAYIN KALİTESİNDE GÖRSELLEŞTİRME: "ROBUSTNESS HEATMAP"
 # =========================================================================
 def plot_robustness_heatmap(gamma_range, r_range, eta_grid, mean_time_grid,
-                              output_dir=OUTPUT_DIR):
+                              output_dir=str(FIG_DIR)):
     """
     Ana teslim edilebilir görsel: eta(gamma, r) ısı haritası + kontur,
     ENAQT sweet spot / Zeno bastırma / yüksek-verim plato bölgesi

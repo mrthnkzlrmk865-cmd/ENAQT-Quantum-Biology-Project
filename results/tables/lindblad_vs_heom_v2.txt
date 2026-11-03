@@ -1,0 +1,6 @@
+Lindblad vs HEOM (r = 2.0 nm, sonsuz zaman, HEOM derinlik 11):
+  HEOM            : γ* = 20 ps^-1, <t>min = 2.465 ps
+  Lindblad (γ)    : γ* = 3.98 ps^-1, <t>min = 2.324 ps
+  Lindblad (2γ)   : γ* = 2 ps^-1 (HEOM ekseninde), <t>min = 2.324 ps
+  γ = 39.8 ps^-1'de (güvenilir HEOM aralığının sonu) <t>: HEOM 2.52 ps, Lindblad(2γ) 4.66 ps
+  (γ > 40 ps^-1 HEOM noktaları sayısal olarak güvenilmez olduğundan karşılaştırmaya alınmadı)

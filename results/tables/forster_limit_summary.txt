@@ -1,0 +1,15 @@
+Förster limiti kontrolü (Lindblad, açıklayıcı FRET-benzeri parametreler):
+  log k – log r uydurma eğimi = -5.996  (Förster: -6)
+  R0 (k_T = k_D) = 4.11 nm
+  (uydurma r = 2–10 nm üzerinde)
+  r ≥ 2 nm: maks |η_model - 1/(1+(r/R0)^6)| = 0.0005
+  r ≥ 2 nm: maks |k_model/k_HakenStrobl - 1| = 0.0149
+  r < 2 nm: maks |k_model/k_HakenStrobl - 1| = 0.490 (k_T artık Γ_sink ile kıyaslanabilir -> geri transfer; nokta-dipol de burada geçersiz)
+  Kanonik ENAQT rejiminde (ΔE=25 cm^-1, γ=1 ps^-1) etkin üs n(r) (Förster: 6):
+    r = 1.0 nm: n = 0.28
+    r = 2.0 nm: n = 3.76
+    r = 3.0 nm: n = 5.70
+    r = 4.0 nm: n = 5.94
+    r = 6.0 nm: n = 6.00
+  -> kısa mesafede kanonik rejim Förster yasasından sapar; uzak mesafede (zayıf kaplin) ona yaklaşır.
+  Uydurma (eğim, R0) yalnızca FRET-benzeri rejime aittir.

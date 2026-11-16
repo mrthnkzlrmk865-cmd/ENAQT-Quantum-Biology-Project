@@ -1,0 +1,33 @@
+Doğrulama: numpy HEOM (T_MAX=25 ps, trapez) vs orijinal QuTiP CSV (400 nokta)
+  max |Δη|            = 6.99e-05
+  max |Δ<t>|/<t>      = 1.13e-04
+
+Kesme etkisi (aynı model, T_MAX=25 ps vs sonsuz zaman), r >= 4 nm:
+  η (kesik)   aralığı = 0.412 – 0.812
+  η (sonsuz)  aralığı = 0.956 – 0.985
+  <t> (kesik) aralığı = 9.70 – 11.73 ps
+  <t> (sonsuz)aralığı = 14.80 – 43.78 ps
+
+r başına en büyük göreli <t> hatası ve η hatası (kesik - sonsuz), tüm γ üzerinden:
+  (r=1.0 nm'deki hata zaman adımı (dt=0.114 ps) hızlı salınımları çözemediği için;
+   r >= ~2 nm'deki hata T_MAX=25 ps kesmesinden)
+  r= 1.00 nm  |Δ<t>|/<t> ≤   1.70 %   |Δη| ≤ 0.0092
+  r= 1.21 nm  |Δ<t>|/<t> ≤   0.32 %   |Δη| ≤ 0.0027
+  r= 1.42 nm  |Δ<t>|/<t> ≤   0.04 %   |Δη| ≤ 0.0003
+  r= 1.63 nm  |Δ<t>|/<t> ≤   0.10 %   |Δη| ≤ 0.0002
+  r= 1.84 nm  |Δ<t>|/<t> ≤   0.41 %   |Δη| ≤ 0.0005
+  r= 2.05 nm  |Δ<t>|/<t> ≤   1.54 %   |Δη| ≤ 0.0022
+  r= 2.26 nm  |Δ<t>|/<t> ≤   4.78 %   |Δη| ≤ 0.0091
+  r= 2.47 nm  |Δ<t>|/<t> ≤  11.50 %   |Δη| ≤ 0.0292
+  r= 2.68 nm  |Δ<t>|/<t> ≤  21.44 %   |Δη| ≤ 0.0713
+  r= 2.89 nm  |Δ<t>|/<t> ≤  32.57 %   |Δη| ≤ 0.1356
+  r= 3.11 nm  |Δ<t>|/<t> ≤  42.82 %   |Δη| ≤ 0.2119
+  r= 3.32 nm  |Δ<t>|/<t> ≤  51.22 %   |Δη| ≤ 0.2875
+  r= 3.53 nm  |Δ<t>|/<t> ≤  57.64 %   |Δη| ≤ 0.3537
+  r= 3.74 nm  |Δ<t>|/<t> ≤  62.38 %   |Δη| ≤ 0.4074
+  r= 3.95 nm  |Δ<t>|/<t> ≤  65.84 %   |Δη| ≤ 0.4491
+  r= 4.16 nm  |Δ<t>|/<t> ≤  68.34 %   |Δη| ≤ 0.4805
+  r= 4.37 nm  |Δ<t>|/<t> ≤  70.16 %   |Δη| ≤ 0.5040
+  r= 4.58 nm  |Δ<t>|/<t> ≤  71.49 %   |Δη| ≤ 0.5216
+  r= 4.79 nm  |Δ<t>|/<t> ≤  72.48 %   |Δη| ≤ 0.5347
+  r= 5.00 nm  |Δ<t>|/<t> ≤  73.21 %   |Δη| ≤ 0.5445

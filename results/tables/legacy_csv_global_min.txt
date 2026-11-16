@@ -1,0 +1,1 @@
+Eski CSV global minimum <t> = 2.0527 ps @ r = 1.000 nm, γ = 12.674 ps^-1 (η = 0.9894); CSV satır indeksi 3 (başlık hariç, 0'dan)

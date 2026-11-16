@@ -37,13 +37,21 @@ kritik biyofiziksel unsurla genişletir:
 BİRİM SİSTEMİ NOTU:
   Adım 2.1'de enerjiler/kaplinler cm^-1 girilip rad/ps'e çevrilmişti.
   Bu adımda TARANAN parametre olan dephasing oranı gamma DOĞRUDAN ps^-1
-  cinsinden tanımlanıyor (kullanıcı talebi ve Faz 3 deneysel sıcaklık/
-  viskozite eşleşmesi için daha doğal birim - floresan ömürleri, kinetik
+  cinsinden tanımlanıyor (kinetik hızlarla karşılaştırma için
+  daha doğal birim - floresan ömürleri, kinetik
   hızlar hep ps^-1/ns^-1 cinsinden raporlanır). ps^-1, rad/ps ile aynı
   boyuta (ters zaman) sahip olduğundan Lindblad operatörlerinde doğrudan
   kullanılabilir; ekstra dönüşüm gerekmez.
 =======================================================================
 """
+# =====================================================================
+# v1 (ORİJİNAL) SCRIPT — Revizyon v2 notu:
+#   Bu dosya yalnızca yolları göreli hale getirilerek korunmuştur; fizik/
+#   hesap değiştirilmemiştir. v1'in bilinen sorunları (T_MAX kesmesi,
+#   HEOM derinlik 5'in büyük r/γ'da yakınsamaması, γ↔λ eşleştirmesinde
+#   ~2 çarpanı) için bkz. CHANGELOG.md ve src/heom_2d_scan_v2.py.
+# =====================================================================
+
 
 import numpy as np
 import qutip as qt
@@ -51,6 +59,13 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from typing import Tuple
 import time
+from pathlib import Path
+# Çıktı klasörleri (repo köküne göre göreli; mutlak yol yok)
+_ROOT = Path(__file__).resolve().parents[1]
+FIG_DIR = _ROOT / "results" / "figures"
+DATA_DIR = _ROOT / "results" / "data"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Adım 2.1'den taşınan sabitler (tutarlılık için aynı isimlerle)
 C_LIGHT_CM_PER_PS = 2.99792458e-2
@@ -234,7 +249,7 @@ class ENAQTSystem:
                kümülatif olarak biriktiği için t_final'daki değeri
                doğrudan toplam yakalanan olasılığı verir.
 
-        Yöntem B (akı integrali, KULLANICI TALEBİ):
+        Yöntem B (akı integrali):
             eta_integral = integral_0^t_final [ Gamma_sink * P_acceptor(t) ] dt
             -> Sink'e giren akışın zamana göre integrali. Trapezoid
                kuralıyla nümerik olarak hesaplanır.
@@ -360,7 +375,7 @@ def run_2d_scan(gamma_range_psinv: np.ndarray, r_range_nm: np.ndarray,
 # GÖRSELLEŞTİRME: Heatmap + Kontur + Sweet Spot Tespiti
 # -----------------------------------------------------------------------
 def plot_enaqt_dual_map(gamma_range, r_range, eta_grid, mean_time_grid,
-                          save_path="/home/claude/enaqt_dual_heatmap.png"):
+                          save_path=str(FIG_DIR / "enaqt_dual_heatmap.png")):
     """
     YAN YANA iki 2D harita:
       (a) eta(gamma, r)      -> doygunluğu gösterir (maksimumu işaretler)
@@ -411,7 +426,7 @@ def plot_enaqt_dual_map(gamma_range, r_range, eta_grid, mean_time_grid,
 
 
 def plot_enaqt_1d_slice_regimes(gamma_range, r_range, mean_time_grid, r_target_nm=2.0,
-                                  save_path="/home/claude/enaqt_1d_regime_slice.png"):
+                                  save_path=str(FIG_DIR / "enaqt_1d_regime_slice.png")):
     """
     Sabit r = r_target_nm'de <t> vs gamma kesiti (log-x eksen).
     Üç fiziksel rejim açıkça etiketlenir:
@@ -499,10 +514,10 @@ if __name__ == "__main__":
     plt.title("Sink/Loss Dahil Tam Sistem Dinamiği (Tek Nokta Testi)")
     plt.legend()
     plt.grid(alpha=0.3)
-    plt.savefig("/home/claude/single_point_sink_loss_dynamics.png", dpi=300)
+    plt.savefig(FIG_DIR / "single_point_sink_loss_dynamics.png", dpi=300)
     plt.close()
-    print("[OK] Tek nokta dinamik grafiği kaydedildi: "
-          "/home/claude/single_point_sink_loss_dynamics.png")
+    print("[OK] Tek nokta dinamik grafiği kaydedildi:",
+          FIG_DIR / "single_point_sink_loss_dynamics.png")
 
     print("\n" + "=" * 70)
     print("ADIM 2.2: 2D PARAMETRE TARAMASI - KANONİK ENAQT MODELİ")
@@ -518,7 +533,8 @@ if __name__ == "__main__":
     # bölgelerde hızlı koherent salınımlar trapezoidal integrasyonu
     # under-sample ediyordu (eta_direct vs eta_integral arası %11 sahte
     # fark -> aliasing hatası, gerçek fizik değil). n_steps=800 ile bu
-    # hata <1e-3 seviyesine düşüyor (doğrulandı, bkz. yandaki test).
+    # hata azalıyor (v2 notu: büyük r'de T_MAX=30 ps kesmesi ayrıca
+    # η'yı düşürür; sonsuz-zaman değerler için src/heom_2d_scan_v2.py).
     eta_grid, mean_time_grid, max_discrepancy = run_2d_scan(
         gamma_range, r_range, CANONICAL_ENAQT_PARAMS,
         t_max_ps=30.0, n_steps=800, verbose=True
@@ -528,9 +544,9 @@ if __name__ == "__main__":
     plot_enaqt_1d_slice_regimes(gamma_range, r_range, mean_time_grid, r_target_nm=2.0)
 
     # Ham veriyi de kaydedelim (Faz 3/4 karşılaştırması için)
-    np.savez("/home/claude/eta_scan_data.npz",
+    np.savez(DATA_DIR / "eta_scan_data.npz",
               gamma_range=gamma_range, r_range=r_range,
               eta_grid=eta_grid, mean_time_grid=mean_time_grid)
-    print("\n[OK] Ham tarama verisi kaydedildi: /home/claude/eta_scan_data.npz")
+    print(f"\n[OK] Ham tarama verisi kaydedildi: {DATA_DIR / 'eta_scan_data.npz'}")
 
     print("\n[OK] Adım 2.2 tamamlandı.")

@@ -1,0 +1,2 @@
+construct,replicate,F_DA,F_D,notes
+YAPI_ADI,1,0.0,0.0,"F_DA: D+A yapısında donör emisyonu; F_D: donör-yalnız kontrolde donör emisyonu (aynı konsantrasyon, arka plan çıkarılmış). Alternatif: F_DA/F_D yerine doğrudan E sütunu."

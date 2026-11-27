@@ -1,0 +1,9 @@
+{
+  "pair": "Alexa 488 / Alexa 594 (ÖRNEK)",
+  "R0_lit_nm": 5.4,
+  "R0_rel_sd": 0.07,
+  "R0_source": "ÖRNEK: Schuler ve ark. 2005 (PNAS 102:2754) çalışmasında bu çift için kullanılan değer; gerçek çiftiniz ve koşullarınız için güncelleyin",
+  "fixed": {},
+  "prior_overrides": {},
+  "success_rule": {"min_fraction_in_90": 0.67, "max_mae": 0.10}
+}

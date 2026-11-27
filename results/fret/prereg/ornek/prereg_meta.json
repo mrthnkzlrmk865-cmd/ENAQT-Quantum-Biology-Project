@@ -1,0 +1,39 @@
+{
+  "created": "2026-11-27T20:55:06+03:00",
+  "git_commit": "4501986d65e7404fda4555d460e840319d443940 (kaydedilmemiş değişiklikler VAR)",
+  "sha256": {
+    "yapılar": "fbb0622b8ba9abc5481be05c64d8b88e569e8e50871bf898054a097ad868d799",
+    "ayar": "b9f32204dc5378ea4f1d44b1850d6396d7962b2e3c9555a3ec69d0b981e0ca77",
+    "model kodu": "967f8aa03af80250e74676b6fd33f31e004079f61ae348db2d441789f24a3760",
+    "bu script": "855256f06138f79a8c253df924cf5a326f6eb30e1750504e334dbe152803560d"
+  },
+  "constructs_path": "data/lab/ornek/ORNEK_yapilar.csv",
+  "config_path": "data/lab/ornek/ORNEK_model_ayari.json",
+  "config": {
+    "pair": "Alexa 488 / Alexa 594 (ÖRNEK)",
+    "R0_lit_nm": 5.4,
+    "R0_rel_sd": 0.07,
+    "R0_source": "ÖRNEK: Schuler ve ark. 2005 (PNAS 102:2754) çalışmasında bu çift için kullanılan değer; gerçek çiftiniz ve koşullarınız için güncelleyin",
+    "fixed": {},
+    "prior_overrides": {},
+    "success_rule": {
+      "min_fraction_in_90": 0.67,
+      "max_mae": 0.1
+    }
+  },
+  "n_prior_samples": 20000,
+  "seed": 2026,
+  "free_params": [
+    "R0",
+    "delta",
+    "sigma",
+    "d0"
+  ],
+  "fixed": {},
+  "priors": {
+    "R0": "log-normal(medyan 5.4, log-sd 0.07)",
+    "delta": "normal(0, 0.05)",
+    "sigma": "yarı-normal(ölçek 0.05)",
+    "d0": "kesik normal(0.6, 0.5; [-1, 3])"
+  }
+}

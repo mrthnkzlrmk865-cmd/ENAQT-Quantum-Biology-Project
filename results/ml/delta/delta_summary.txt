@@ -1,0 +1,17 @@
+Δ-öğrenme: test kümesinde (200 HEOM noktası) ⟨t⟩ medyan göreli hata (5 tohumun medyanı)
+  Düzeltmesiz Lindblad(γ):  %6.8    Düzeltmesiz Lindblad(2γ): %12.5
+  n_HEOM | (a) doğrudan GP(HEOM)        | (b) Lindblad(γ) + GP(Δ)      | (c) Lindblad(2γ) + GP(Δ)    
+      25 | %5.91                        | %8.10                        | %11.42                      
+      50 | %2.70                        | %4.48                        | %5.31                       
+     100 | %1.32                        | %1.87                        | %2.57                       
+     200 | %0.59                        | %0.76                        | %0.82                       
+     400 | %0.30                        | %0.25                        | %0.37                       
+     800 | %0.12                        | %0.08                        | %0.12                       
+  (a) doğrudan GP(HEOM): %5 hedefine ulaşılan en küçük n_HEOM = 50
+  (b) Lindblad(γ) + GP(Δ): %5 hedefine ulaşılan en küçük n_HEOM = 50
+  (c) Lindblad(2γ) + GP(Δ): %5 hedefine ulaşılan en küçük n_HEOM = 100
+
+HEOM / Lindblad ⟨t⟩ oranı, kanonik model (ΔE = 25 cm⁻¹), r = 1–5 nm, γ = 0.01–40 ps⁻¹ (v2 doğrudan tarama):
+  t_HEOM / t_L(γ):  aralık 0.41 – 1.26
+  t_HEOM / t_L(2γ): aralık 0.28 – 1.51
+  → '~2 çarpanı' tek bir sabit değildir; uyuşmazlık r ve γ'ya bağlıdır (bkz. heom_lindblad_ratio_map.png).

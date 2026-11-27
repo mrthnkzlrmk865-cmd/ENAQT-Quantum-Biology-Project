@@ -1,11 +1,11 @@
 # Biyomoleküler İskeleli Kromofor Çiftlerinde Çevre-Yardımlı Enerji Transferi (ENAQT)
 
 **Açık kuantum sistem simülasyonu ve kararlı-hal FRET ile sınır-rejim kontrolü**
-TÜBİTAK 2204-A lise araştırma projesi · in silico aşama · **revizyon v2**
+Bağımsız lise araştırma projesi · in silico aşama + yapay zekâ / laboratuvar araçları · **revizyon v3**
 
 > **Kısaca:** Bir donör–akseptör kromofor çiftinde, orta düzeyde çevresel gürültünün (dephasing) enerji transferini *model içinde* hızlandırıp hızlandırmadığını (ENAQT) Lindblad ve HEOM yöntemleriyle inceliyoruz. Laboratuvar aşamasında ölçülecek olan şey ise ENAQT değil, modelin **inkoherent (Förster) sınırıdır**: peptit/protein iskelede kararlı-hal FRET verimi E(r). ENAQT bu projede **deneysel olarak test edilmemektedir**.
 
-v2 revizyonunda v1'deki bazı sayısal iddialar düzeltildi veya geri çekildi. Ayrıntılar için [CHANGELOG.md](CHANGELOG.md) dosyasına bakın.
+v2 revizyonunda v1'deki bazı sayısal iddialar düzeltildi veya geri çekildi. v3'te simülasyonu laboratuvara bağlayan yapay zekâ / makine öğrenmesi araçları eklendi (§11 ve [docs/ML_YOL_HARITASI.md](docs/ML_YOL_HARITASI.md)). Ayrıntılar için [CHANGELOG.md](CHANGELOG.md) dosyasına bakın.
 
 ---
 
@@ -21,7 +21,8 @@ v2 revizyonunda v1'deki bazı sayısal iddialar düzeltildi veya geri çekildi. 
 8. [Sınırlamalar](#8-sınırlamalar)
 9. [Şekiller](#9-şekiller)
 10. [Yapay zekâ kullanımı beyanı](#10-yapay-zekâ-kullanımı-beyanı)
-11. [Kaynaklar](#11-kaynaklar)
+11. [Yapay zekâ ve laboratuvar araçları (v3)](#11-yapay-zekâ-ve-laboratuvar-araçları-v3)
+12. [Kaynaklar](#12-kaynaklar)
 
 ---
 
@@ -44,6 +45,9 @@ v2 revizyonunda v1'deki bazı sayısal iddialar düzeltildi veya geri çekildi. 
 ```
 ├── README.md, SUMMARY.md, CHANGELOG.md, LICENSE, requirements.txt
 ├── run_all_v2.sh                       # v2 analiz zincirinin tamamı
+├── run_all_ml.sh                       # v3 yapay zekâ + laboratuvar araçları zinciri
+├── docs/ML_YOL_HARITASI.md             # v3 yol haritası, durum, raporlama dili
+├── data/lab/                           # laboratuvar dosya şablonları + ornek/ (ÖRNEK ve SENTETİK)
 ├── src/
 │   ├── enaqt_core.py                   # v2 çekirdek: numpy/scipy Lindblad + HEOM, sonsuz-zaman η ve ⟨t⟩
 │   ├── analyze_legacy_csv.py           # v1 CSV'den doğrudan sayılar (global min, S(r))
@@ -55,12 +59,16 @@ v2 revizyonunda v1'deki bazı sayısal iddialar düzeltildi veya geri çekildi. 
 │   ├── lindblad_vs_heom_v2.py          # r = 2 nm Lindblad–HEOM karşılaştırmasının tekrarı
 │   ├── sink_sensitivity.py             # Γ_sink = 0.5 / 1 / 2 ps⁻¹
 │   ├── forster_limit.py                # FRET-benzeri rejimde Förster limiti
+│   ├── ml_*.py                         # v3 (A) in silico: veri seti, emülatör, Δ-öğrenme, seyrek regresyon
+│   ├── fret_*.py                       # v3 (B) laboratuvar: Bayesçi FRET modeli, kalibrasyon, ön-kayıt, karşılaştırma
 │   └── (v1, QuTiP) quantum_biology_module.py, enaqt_parameter_scan.py,
 │        heom_nonmarkovian_validation.py, heom_2d_robustness_scan.py
 └── results/
     ├── figures/   # v1 ve v2 şekilleri (v2 adlarında "v2" ya da yeni ad)
     ├── data/      # v1 ham verileri (değiştirilmedi) + heom_2d_scan_v2.csv
-    └── tables/    # README'deki her sayının kaynağı olan küçük tablolar
+    ├── tables/    # README'deki her sayının kaynağı olan küçük tablolar
+    ├── ml/        # v3 (A) veri seti, emülatör, Δ-öğrenme, seyrek regresyon çıktıları
+    └── fret/      # v3 (B) kalibrasyon testi, ÖRNEK ön-kayıt, SENTETİK karşılaştırma
 ```
 
 v1 scriptlerinde yalnızca çıktı yolları göreli hale getirildi; fizik ve hesap değiştirilmedi.
@@ -70,6 +78,7 @@ v1 scriptlerinde yalnızca çıktı yolları göreli hale getirildi; fizik ve he
 ```bash
 pip install -r requirements.txt       # v2 için numpy, scipy, pandas, matplotlib yeterli
 bash run_all_v2.sh                    # tüm v2 tablo ve şekilleri yeniden üretir (~20–40 dk)
+bash run_all_ml.sh                    # v3 yapay zekâ + laboratuvar araçları (~45–60 dk; scikit-learn gerekir)
 python src/heom_2d_scan_v2.py --reuse # yalnızca tablo/grafikleri yeniden çizer (saniyeler)
 ```
 
@@ -209,13 +218,40 @@ Plan: ODTÜ'de peptit/protein iskelesiyle **kararlı-hal (absolute) FRET**. DNA 
 
 ## 10. Yapay zekâ kullanımı beyanı
 
-Bu depodaki kodun ve dokümantasyonun hazırlanmasında yapay zekâ asistanlarından yararlanılmıştır. Bu kullanım kod yazımı, hata ayıklama ve metin düzenlemesini kapsar. v2 revizyonu (yeni analiz scriptleri, yeniden hesaplamalar, bu README, SUMMARY ve CHANGELOG) bir yapay zekâ asistanıyla (Anthropic Claude) birlikte hazırlanmıştır.
+Bu depodaki kodun ve dokümantasyonun hazırlanmasında yapay zekâ asistanlarından yararlanılmıştır. Bu kullanım kod yazımı, hata ayıklama ve metin düzenlemesini kapsar. v2 revizyonu (yeni analiz scriptleri, yeniden hesaplamalar, bu README, SUMMARY ve CHANGELOG) ve v3 yapay zekâ / laboratuvar araçları (`src/ml_*.py`, `src/fret_*.py`, `docs/ML_YOL_HARITASI.md`) bir yapay zekâ asistanıyla (Anthropic Claude) birlikte hazırlanmıştır.
 
 **Öğrencinin katkısı:** *[Öğrenci tarafından kendi cümleleriyle doldurulacak: ör. araştırma sorusunun seçimi, model ve parametre kararları, sonuçların yorumu, deney tasarımı, laboratuvar bağlantısı.]*
 
-Jüri sunumunda kodun her adımını (ör. HEOM'un ne olduğu, λ–γ eşleştirmesi, neden sonsuz-zaman integrali kullanıldığı) öğrencinin kendisinin açıklayabilmesi hedeflenmektedir.
+Hedef, kodun her adımını (ör. HEOM'un ne olduğu, λ–γ eşleştirmesi, neden sonsuz-zaman integrali kullanıldığı, Bayesçi modelin varsayımları) öğrencinin kendisinin açıklayabilmesidir.
 
-## 11. Kaynaklar
+## 11. Yapay zekâ ve laboratuvar araçları (v3)
+
+Ayrıntılı plan, durum ve tüm tablolar: **[docs/ML_YOL_HARITASI.md](docs/ML_YOL_HARITASI.md)**.
+
+Proje iki ayrı yola bölünmüştür.
+
+- **(A) In silico yol.** Simülasyonu hızlandıran ve belirsizliğini veren emülatörler kuruldu.
+- **(B) Laboratuvar yolu.** Kararlı-hal FRET verimini ölçümden **önce** belirsizlikle tahmin eden fizik-temelli bir Bayesçi model kuruldu.
+
+PINN ana model olarak kullanılmadı. Denklemler biliniyor ve kesin çözülebiliyor; sistem katı; laboratuvar verisi zaman serisi değil, tek bir sayı (E).
+
+**Öne çıkan sonuçlar (kaynaklar `results/ml/` ve `results/fret/` altında):**
+- **HEOM emülatörü:** HEOM-GP (800 eğitim noktası) test kümesinde ⟨t⟩'yi medyan %0,14 hatayla, doğrudan HEOM'dan ~15 000 kat hızlı tahmin ediyor. Kanonik S(r) eğrisini yeniden üretiyor: S_max 3,23 ve 3,18, ikisi de r = 3,30 nm'de.
+- **Emülatörün zayıf noktası:** Rastgele örneklemeyle, ENAQT açısından en ilginç koherent köşede (ΔE < 50 cm⁻¹, γ < 1 ps⁻¹) hata %41'e (%95'lik) çıkıyor ve belirsizlik aşırı özgüvenli (%90 aralık kapsaması %32). Bütçenin bir kısmını bu köşeye yönlendirmek sorunu gideriyor (%1,0, kapsama %94).
+- **Δ-öğrenme (negatif sonuç):** Lindblad → HEOM Δ-öğrenme, HEOM'u doğrudan öğrenmekten iyi değil. "~2 çarpanı" transfer süresi için sabit bir düzeltme değil: oran 0,28–1,51 arasında değişiyor.
+- **Seyrek regresyon:** Zayıf kaplin rejiminde veriden tek terimli r⁻⁶ yasasını buluyor (%0,1 hata). Bu bir doğrulama testi, keşif değil. Kanonik rejimde r = 1–8 nm için basit bir kuvvet yasası yok.
+- **Bayesçi FRET modeli:** Sahte deneylerde (120 adet) R0, δ ve d0 için %90 aralıklar gerçek değeri %87,5–%92,5 oranında kapsıyor, yani belirsizlik dürüst. Ölçüm gürültüsü σ ise küçükken fazla tahmin ediliyor (kapsama %80); σ ayrıca tekrar ölçümlerinden belirlenmeli. Uydurmaya katılmayan bir yapının ortalama E'si medyan 0,011 hatayla ve %95 kapsamayla tahmin edildi (`results/fret/calibration/calibration_summary.txt`).
+- **Uçtan uca demo (ÖRNEK yapılar, SENTETİK ölçümler):** Modelde olmayan bir etki (cis-kıvrım) bilerek eklendi. Ön-kayıtlı kural yine de geçti ve küresel δ etkiyi yakalamadı; R0 literatürden +2 sd kaydı. Sorunu bir-yapıyı-dışarıda-bırak testi yakaladı (2/4 kapsama). Karşılaştırma raporu bu tür kaymalar için artık otomatik uyarı veriyor.
+
+**Laboratuvar iş akışı:**
+1. `data/lab/` şablonlarını doldurun.
+2. `src/fret_prereg.py` ile ön-kayıt yapın, commit'leyin ve etiketleyin.
+3. Ölçün.
+4. `src/fret_compare.py` ile karşılaştırın.
+
+Adımlar ayrıntılı olarak `docs/ML_YOL_HARITASI.md` §5'te. `data/lab/ornek/` içindeki dosyalar ÖRNEK ve SENTETİK'tir, **gerçek ölçüm değildir**.
+
+## 12. Kaynaklar
 
 - Förster, T. (1948). *Ann. Phys.* 437, 55–75.
 - Haken, H. & Strobl, G. (1973). *Z. Phys.* 262, 135–148.
@@ -226,5 +262,18 @@ Jüri sunumunda kodun her adımını (ör. HEOM'un ne olduğu, λ–γ eşleşti
 - Ishizaki, A. & Fleming, G. R. (2009). *J. Chem. Phys.* 130, 234111.
 - Tanimura, Y. (2020). *J. Chem. Phys.* 153, 020901.
 - Lambert, N. et al. (2023). *Phys. Rev. Research* 5, 013181 (QuTiP-BoFiN / HEOM).
+
+v3 (yapay zekâ / laboratuvar) için:
+- Häse, F., Kreisbeck, C. & Aspuru-Guzik, A. (2017). *Chem. Sci.* 8, 8419 (HEOM transfer süresi için sinir ağı emülatörü).
+- Goodman, J. & Weare, J. (2010). *Commun. Appl. Math. Comput. Sci.* 5, 65 (afin-değişmez topluluk örnekleyicisi).
+- Talts, S. et al. (2018). arXiv:1804.06788 (simülasyon-tabanlı kalibrasyon, SBC).
+- Kennedy, M. C. & O'Hagan, A. (2001). *J. R. Stat. Soc. B* 63, 425 (model uyuşmazlığıyla Bayesçi kalibrasyon).
+- Brynjarsdóttir, J. & O'Hagan, A. (2014). *Inverse Problems* 30, 114007 (uyuşmazlık terimi ve tanımlanabilirlik).
+- Perdikaris, P. et al. (2017). *Proc. R. Soc. A* 473, 20160751 (çok-doğruluklu GP).
+- Brunton, S. L., Proctor, J. L. & Kutz, J. N. (2016). *PNAS* 113, 3932 (SINDy).
+- Krishnapriyan, A. et al. (2021). *NeurIPS* 34 (PINN başarısızlık modları).
+- Best, R. B. et al. (2007). *PNAS* 104, 18964 (poliprolin: cis-kıvrımlar ve boya esnekliği).
+- Evers, T. H. et al. (2006). *Biochemistry* 45, 13183 (esnek bağlayıcılı floresan protein FRET'i, WLC modeli).
+- Hellenkamp, B. et al. (2018). *Nat. Methods* 15, 669 (çok laboratuvarlı smFRET; R0/κ² belirsizliği).
 
 Lisans: MIT (bkz. `LICENSE`).

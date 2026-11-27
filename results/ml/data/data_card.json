@@ -1,0 +1,33 @@
+{
+  "seed": 20261127,
+  "quick": false,
+  "n_lindblad": 20000,
+  "n_heom": 1000,
+  "n_depth_check": 40,
+  "r_nm": [
+    0.8,
+    8.0
+  ],
+  "dE_cm1": [
+    0.0,
+    1000.0
+  ],
+  "gamma_lindblad_ps_inv": [
+    0.1,
+    200.0
+  ],
+  "gamma_heom_ps_inv": [
+    0.1,
+    40.0
+  ],
+  "heom_depth": 11,
+  "heom_Nk": 1,
+  "seconds": {
+    "lindblad": 6.9,
+    "heom": 305.4,
+    "depth_check": 55.6
+  },
+  "depth_check_max_rel_t_d11_vs_d13": 1.8418168676870295e-06,
+  "depth_check_median_rel_t_d11_vs_d13": 1.0547118733938987e-15,
+  "heom_nonphysical_eta": 0
+}

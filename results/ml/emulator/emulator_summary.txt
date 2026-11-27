@@ -1,0 +1,15 @@
+Emülatör sonuçları (test kümesi; ⟨t⟩ için göreli hata, η için mutlak hata)
+  Lindblad-GP   ⟨t⟩: medyan %0.07, %95'lik %1.09, maks %110.5; %90 aralık kapsaması %98.0  (n_eğitim = 2000, tahmin 130 µs/nokta)
+  Lindblad-MLP  ⟨t⟩: medyan %0.50, %95'lik %2.55, maks %67.9  (n_eğitim = 16000, tahmin 1 µs/nokta)
+  Lindblad-GP   η  : medyan 9.18e-06, %95'lik 2.41e-04, maks 8.40e-03; %90 aralık kapsaması %97.6  (n_eğitim = 2000, tahmin 144 µs/nokta)
+  Lindblad-MLP  η  : medyan 1.10e-04, %95'lik 4.55e-04, maks 9.00e-03  (n_eğitim = 16000, tahmin 1 µs/nokta)
+  HEOM-GP       ⟨t⟩: medyan %0.14, %95'lik %3.70, maks %11.6; %90 aralık kapsaması %96.0  (n_eğitim = 800, tahmin 40 µs/nokta)
+  HEOM-MLP      ⟨t⟩: medyan %1.24, %95'lik %7.65, maks %28.9  (n_eğitim = 800, tahmin 4 µs/nokta)
+  HEOM-GP       η  : medyan 3.73e-05, %95'lik 6.86e-04, maks 2.49e-03; %90 aralık kapsaması %96.0  (n_eğitim = 800, tahmin 59 µs/nokta)
+  HEOM-MLP      η  : medyan 5.09e-04, %95'lik 2.64e-03, maks 8.59e-03  (n_eğitim = 800, tahmin 3 µs/nokta)
+  Doğrudan hesap süresi: Lindblad ≈ 457 µs/nokta, HEOM (derinlik 11) ≈ 585 ms/nokta (medyan)
+
+Uygulama: kanonik model (ΔE = 25 cm⁻¹) için S(r), HEOM-GP emülatörü vs v2 doğrudan HEOM taraması
+  S göreli farkı: medyan %2.21, maks %6.97 (41 r noktası)
+  S_max: emülatör 3.23 @ r = 3.30 nm; doğrudan 3.18 @ r = 3.30 nm
+  (Emülatör ΔE ∈ [0, 1000] cm⁻¹ genelinde eğitildi; ΔE = 25'e özel eğitilmedi.)

@@ -1,0 +1,18 @@
+Seyrek model seçimi (alt-küme araması, kütüphane r^-p, p = 0…8, ≤ 3 terim, tolerans %1):
+  [FRET-benzeri: ΔE=1000 cm⁻¹, γ=200 ps⁻¹, r=2–10 nm]
+    bulunan model: k(r) = 4.81·r^-6 + -0.217·r^-8
+    maks göreli hata %0.53; en iyi tek terimli modelin hatası %1.33
+    log-log eğim -5.995; yerel üs aralığı 5.92–6.00
+  [ΔE=1000 cm⁻¹, γ=2 ps⁻¹ (zayıf dephasing), r=2–10 nm]
+    bulunan model: k(r) = 0.358·r^-6
+    maks göreli hata %0.10; en iyi tek terimli modelin hatası %0.10
+    log-log eğim -6.000; yerel üs aralığı 5.99–6.00
+  [kanonik: ΔE=25 cm⁻¹, γ=1 ps⁻¹, r=3–8 nm]
+    bulunan model: k(r) = 178·r^-6 + 106·r^-7 + -313·r^-8
+    maks göreli hata %0.47; en iyi tek terimli modelin hatası %4.17
+    log-log eğim -5.964; yerel üs aralığı 5.73–6.00
+  [kanonik: ΔE=25 cm⁻¹, γ=1 ps⁻¹, r=1–8 nm]
+    bulunan model: k(r) = 306·r^-6 + -581·r^-7 + 279·r^-8
+    maks göreli hata %29.12  (TOLERANS SAĞLANAMADI); en iyi tek terimli modelin hatası %96.80
+    log-log eğim -4.595; yerel üs aralığı 0.18–6.00
+Not: r^-6'nın zayıf kaplin rejiminde bulunması bir doğrulamadır (V ∝ r^-3 modele girdi olarak verildi).

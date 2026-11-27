@@ -1,0 +1,9 @@
+{
+  "pair": "DONÖR / AKSEPTÖR adı (ör. Alexa 488 / Alexa 594 veya mTurquoise2 / mVenus)",
+  "R0_lit_nm": 0.0,
+  "R0_rel_sd": 0.07,
+  "R0_source": "R0 kaynağı + koşullar (tampon, kırılma indisi, donör kuantum verimi, κ² varsayımı)",
+  "fixed": {},
+  "prior_overrides": {},
+  "success_rule": {"min_fraction_in_90": 0.67, "max_mae": 0.10}
+}

@@ -1,0 +1,12 @@
+Lindblad-GP emülatörü: rejime göre hata ve hedefli örnekleme (eğitim bütçesi 2000 nokta)
+Koherent köşe: ΔE < 50 cm⁻¹, γ < 1 ps⁻¹ (girdi uzayı hacminin ~%1'ü)
+
+  [rastgele 2000           ] genel test (4000)            n=4000: medyan %0.04, %95'lik %1.1, maks %55, %90 kapsama %97
+  [rastgele 2000           ] genel testin köşe kısmı      n=  55: medyan %2.67, %95'lik %32.7, maks %55, %90 kapsama %36
+  [rastgele 2000           ] bağımsız köşe testi (1000)   n=1000: medyan %3.70, %95'lik %40.8, maks %120, %90 kapsama %32
+  [hedefli 1500 + 500 köşe ] genel test (4000)            n=4000: medyan %0.74, %95'lik %5.8, maks %32, %90 kapsama %97
+  [hedefli 1500 + 500 köşe ] genel testin köşe kısmı      n=  55: medyan %0.03, %95'lik %0.5, maks %1, %90 kapsama %96
+  [hedefli 1500 + 500 köşe ] bağımsız köşe testi (1000)   n=1000: medyan %0.02, %95'lik %1.0, maks %14, %90 kapsama %94
+
+Yorum: Genel ortalama hata, ilginç rejimdeki hatayı gizleyebilir. Emülatörün güvenilirliği
+rejim bazında raporlanmalı; az bilgilendirici bölgelere değil, zor bölgelere simülasyon harcanmalıdır.

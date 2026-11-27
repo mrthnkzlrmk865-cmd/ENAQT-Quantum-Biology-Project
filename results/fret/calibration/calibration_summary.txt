@@ -1,0 +1,16 @@
+Bayesçi FRET modeli — sahte deney kalibrasyon testi (K = 120; örnek yapılar Pro6/12/20 × 3 tekrar)
+Yakınsayan uydurma: 111/120; maks R̂ medyanı 1.022; min (adım/τ) medyanı 57
+Beklenen kapsama %90 ± 5.4 (K = 120 için %95 bandı)
+
+Parametre  | %90 kapsama | daralma (post sd / öncel sd, medyan) | SBC sıralama χ² p-değeri
+  R0       |   % 87.5    |   0.73                               |  0.65
+  delta    |   % 92.5    |   0.58                               |  0.77
+  sigma    |   % 80.0    |   0.40                               |  0.13
+  d0       |   % 89.2    |   0.59                               |  0.07
+
+Dışarıda bırakılan yapı (Pro15): ortalama E için %90 aralık kapsaması %95.0, tek yeni ölçüm için %84.2; aralık genişliği medyanı 0.080
+Pro15 ortalama E mutlak hata (posterior medyan): medyan 0.011
+
+Yorum: daralma ≈ 1 olan parametreyi veri neredeyse hiç öğretmiyor (öncel baskın).
+Bu test yalnızca model varsayımları doğruyken kalibrasyonu gösterir; model hatasını (ör. poliprolin
+cis-kıvrımları, κ²) test etmez — onu deneyde δ ve dışarıda-bırakma doğrulaması gösterecek.

@@ -1,6 +1,6 @@
 # Bilimsel Özet — In Silico Aşama (revizyon v2)
 
-**TÜBİTAK 2204-A lise araştırma projesi**
+**Bağımsız lise araştırma projesi** (v3 yapay zekâ / laboratuvar araçları için bkz. `docs/ML_YOL_HARITASI.md`)
 Biyomoleküler iskeleli kromofor çiftlerinde çevre-yardımlı enerji transferi (ENAQT)
 
 Tüm sayılar `results/tables/` altındaki dosyalardan alınmıştır; her birinin kaynağı parantez içinde verilmiştir. Neyin değiştiği için `CHANGELOG.md` dosyasına bakın.

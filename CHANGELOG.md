@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## v3 — Yapay zekâ / makine öğrenmesi ve laboratuvar araçları
+
+Plan ve sonuçlar: `docs/ML_YOL_HARITASI.md`. Proje artık TÜBİTAK 2204 takviminden bağımsızdır; README/SUMMARY'deki ilgili ifadeler kaldırıldı.
+
+### Eklenenler
+
+**(A) In silico yol**
+- `src/ml_dataset.py`: 20 000 Lindblad + 1 000 HEOM noktalık LHS veri seti ve veri kartı (`results/ml/data/`).
+- `src/ml_emulator.py`: GP ve MLP emülatörleri. HEOM-GP medyan %0,14 hata, ~15 000× hız; S(r) uygulaması.
+- `src/ml_emulator_regimes.py`: emülatör hatasının koherent köşede birikmesi ve hedefli örnekleme ile giderilmesi.
+- `src/ml_delta_learning.py`: Lindblad → HEOM Δ-öğrenme (negatif sonuç) ve HEOM/Lindblad oran haritası.
+- `src/ml_sparse_regression.py`: veriden mesafe yasası seçimi (r⁻⁶ doğrulaması; kanonik rejimde basit yasa yok).
+
+**(B) Laboratuvar yolu**
+- `src/fret_bayes.py`: Bayesçi Förster ileri modeli (3B Rice mesafe dağılımı, poliprolin / FP-bağlayıcı aileleri, R0 ± %7, κ² dinamik/statik, δ), Goodman–Weare örnekleyici ve tanılar.
+- `src/fret_calibration_test.py`: sahte deneylerle kapsama ve SBC testi.
+- `src/fret_prereg.py`, `src/fret_compare.py`, `src/fret_lab_io.py`: ölçümden önce ön-kayıt; ölçümden sonra donmuş karşılaştırma, posterior (öncel-kayması uyarısı) ve bir-yapıyı-dışarıda-bırak.
+- `data/lab/*_SABLON.*`: laboratuvar dosya şablonları. `data/lab/ornek/`: ÖRNEK yapılar ve **SENTETİK** ölçümler (gerçek veri değildir).
+- `run_all_ml.sh`, `requirements.txt` içine scikit-learn.
+
+### v2 bulgularına eklenen düzeltme / ayrıntı
+- "~2 çarpanı" (λ–γ eşleştirmesi) koherans sönüm hızı için geçerlidir, **transfer süresi için sabit bir düzeltme değildir**: kanonik modelde t_HEOM/t_Lindblad(2γ) = 0,28–1,51 (`results/ml/delta/delta_summary.txt`).
+- Modeldeki r'den bağımsız gevşeme kanalı (0,02 ps⁻¹) büyük r'de ⟨t⟩'yi ~51 ps'de doyurur ve η'yı ≈ 0,95'te tutar; bu bir model varsayımıdır (`results/ml/data/DATA_CARD.md`).
+
+### Ortam notu
+Hesap ortamında PyPI erişimi yoktu; emcee/PyMC, PySR, PyTorch, sbi yerine numpy/scipy/scikit-learn ile eşdeğer veya daha basit uygulamalar kullanıldı (`docs/ML_YOL_HARITASI.md` §6).
+
 ## v2 — Dürüstlük ve sayısal doğruluk revizyonu
 
 ### Geri çekilen veya düzeltilen iddialar
